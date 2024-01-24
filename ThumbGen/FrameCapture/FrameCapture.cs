@@ -4,17 +4,17 @@ using ThumbGen.Options;
 
 namespace ThumbGen.FrameCapture;
 
-public class FrameCapture
+public class VideoFrameCaptureManager
 {
     private readonly VideoFrameExtractor _frameExtractor;
     private readonly TimeSpan _endTime;
     private readonly TimeSpan _startTime;
     private readonly TilingOptions _tilingOptions;
 
-    public int TotalImages { get; private set; }
-    public TimeSpan TimePerFrame { get; private set; }
+    public int TotalFrames { get; private set; }
+    public TimeSpan AverageTimePerFrame { get; private set; }
 
-    public FrameCapture(TimeSpan endTime, TimeSpan startTime, TilingOptions tilingOptions)
+    public VideoFrameCaptureManager(TimeSpan endTime, TimeSpan startTime, TilingOptions tilingOptions)
     {
         _endTime = endTime;
         _startTime = startTime;
@@ -30,23 +30,22 @@ public class FrameCapture
             throw new InvalidOperationException("StartTime is larger than duration");
         }
 
-
-        TotalImages = _tilingOptions.Rows * _tilingOptions.Columns;
-        TimePerFrame = (_endTime - _startTime) / TotalImages; //TimeSpan.FromTicks((_endTime - _startTime).Ticks / totalImages);
+        TotalFrames = _tilingOptions.Rows * _tilingOptions.Columns;
+        AverageTimePerFrame = (_endTime - _startTime) / TotalFrames;
     }
 
-    public TimeSpan GetFrameTime(int frameNr) => _startTime + TimePerFrame * frameNr;
+    public TimeSpan CalculateFrameTime(int frameNr) => _startTime + AverageTimePerFrame * frameNr;
 
-    public IEnumerable<Frame> CaptureFrames()
+    public IEnumerable<Frame> PerformFrameCapture()
     {
-        var frames = new List<Frame>(TotalImages);
+        var frames = new List<Frame>(TotalFrames);
 
         for (var row = 0; row < _tilingOptions.Rows; row++)
         {
             for (var column = 0; column < _tilingOptions.Columns; column++)
             {
                 var frameNr = column + row * _tilingOptions.Columns;
-                var frameTime = _startTime + TimePerFrame * frameNr;
+                var frameTime = _startTime + AverageTimePerFrame * frameNr;
 
                 var bmp = _frameExtractor.GetAtTimestamp(frameTime, out var frameTs);
 
