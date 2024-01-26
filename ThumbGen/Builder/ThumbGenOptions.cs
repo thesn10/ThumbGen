@@ -4,6 +4,9 @@ using ThumbGen.Options;
 
 namespace ThumbGen.Builder
 {
+    public record ThumbnailSizing(Size TotalSize, SizeF FrameSize, SizeF BorderSize);
+
+
     public class ThumbGenOptions
     {
         internal string Filename { get; }
@@ -15,7 +18,6 @@ namespace ThumbGen.Builder
         internal TilingOptions TilingOptions1 { get; } = new TilingOptions();
         internal TimeSpan? StartTime { get; set; }
         internal TimeSpan? EndTime { get; set; }
-        internal Font TimeCodeFont { get; set; }
         internal bool PreserveAspect { get; set; } = true;
         internal bool AspectOverlap { get; set; } = true;
         internal bool FastMode { get; private set; }
@@ -191,7 +193,7 @@ namespace ThumbGen.Builder
             return this;
         }
 
-        internal (Size totalSize, SizeF frameSize, SizeF borderSize) CalcSizes(int width, int height)
+        internal ThumbnailSizing CalcSizes(int width, int height)
         {
             var totalSize = new Size();
             var frameSize = new SizeF();
@@ -282,7 +284,7 @@ namespace ThumbGen.Builder
                     var totalFrameHeight = rows * _frameExtractor.Height;
                     totalSize.Height = totalFrameHeight + totalBorderHeight;
                 }*/
-            return (totalSize, frameSize, borderSize);
+            return new ThumbnailSizing(totalSize, frameSize, borderSize);
         }
     }
 }

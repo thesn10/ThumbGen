@@ -1,8 +1,13 @@
 ﻿using FFmpeg.AutoGen;
+using ImageMagick;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using ThumbGen.Builder;
+using ThumbGen.FrameCapture;
+using ThumbGen.Magick;
+using ThumbGen.SystemDrawing;
 
 namespace ThumbGen.App
 {
@@ -14,7 +19,6 @@ namespace ThumbGen.App
             AppContext.SetSwitch("System.Drawing.EnableUnixSupport", true);
 
             var input = Path.GetFullPath("./video.webm");//Path.GetFullPath("./video.webm");
-            var output = Path.GetFullPath("./thumbnail.bmp");
             var opts = new ThumbGenOptions(input)
                 //.WithStartTime(TimeSpan.FromSeconds(60))
                 //.WithEndTime(TimeSpan.FromMinutes(4))
@@ -29,14 +33,51 @@ namespace ThumbGen.App
                 .WithBorder(new Size(8, 8), true)
                 .UseBackgroundGradient(
                     new LinearGradient(Color.Cyan, Color.Blue, 45))
-                .WithTimeCode(14f)
+                //.WithTimeCode(14f)
                 //.UseTimecodeBackgroundColor(Color.Black)
                 .UseFastMode();
 
-            var thumbnailGenerator = new SystemDrawingThumbnailGenerator(new VideoFrameExtractor(input), opts);
-            var bitmap = thumbnailGenerator.GenerateBitmap();
+            Stopwatch stopwatch = Stopwatch.StartNew();
 
-            bitmap.Save(output);
+            var output = Path.GetFullPath("./thumbnail.bmp");
+            var thumbnail = SystemDrawingThumbnailGenerator
+                .Create(input, opts)
+                .GenerateThumbnail();
+
+            stopwatch.Stop();
+            Console.WriteLine("System.Drawing: " + stopwatch.Elapsed.ToString());
+
+            thumbnail.SaveToFile(output);
+
+            stopwatch.Restart();
+
+            var output2 = Path.GetFullPath("./thumbnail2.jpg");
+            var thumbnail2 = MagickThumbnailGenerator
+                .Create(input, opts)
+                .GenerateThumbnail();
+
+            stopwatch.Stop();
+            Console.WriteLine("Magick: " + stopwatch.Elapsed.ToString());
+
+            thumbnail.SaveToFile(output2);
+
+
+            var color1 = MagickColorUtil.FromColor(Color.Black);
+            var color2 = MagickColorUtil.FromColor(Color.White);
+
+            var settings = new MagickReadSettings()
+            {
+                Width = 1920,
+                Height = 1080,
+            };
+            settings.SetDefine(MagickFormat.Gradient, "angle", 45);
+
+            var gradientTest = $"gradient:{color1}-{color2}";
+            Console.WriteLine(gradientTest);
+            //var gradientTest2 = $"gradient:#FFFFFFFFFFFFFFFF-#0000000000000000";
+            //Console.WriteLine(gradientTest2);
+            var image2 = new MagickImage(gradientTest, settings);
+            image2.Write(Path.GetFullPath("./gradient2.jpg"));
         }
     }
 }

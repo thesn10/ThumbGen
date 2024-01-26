@@ -1,7 +1,6 @@
 ﻿using EmguFFmpeg;
 using FFmpeg.AutoGen;
 using System;
-using System.Drawing;
 
 namespace ThumbGen.FrameCapture
 {
@@ -29,7 +28,7 @@ namespace ThumbGen.FrameCapture
             }
         }
 
-        public Bitmap GetAtTimestamp(TimeSpan ts, out TimeSpan frameTs)
+        public VideoFrame GetAtTimestamp(TimeSpan ts, out TimeSpan frameTs)
         {
             _reader.Seek(ts);
             frameTs = ts;
@@ -50,14 +49,14 @@ namespace ThumbGen.FrameCapture
                     return null;
                 }
 
-                using var frame = new VideoFrame();
+                var frame = new VideoFrame();
 
                 while (decoder.ReceiveFrame(frame) >= 0)
                 {
                     frameTs = _reader[packet.StreamIndex].ToTimeSpan(frame.Pts);
                     if (FastMode || frameTs >= ts)
                     {
-                        return frame.ToBitmap();
+                        return frame;
                     }
                 }
             }

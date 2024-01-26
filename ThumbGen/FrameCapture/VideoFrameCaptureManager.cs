@@ -14,11 +14,16 @@ public class VideoFrameCaptureManager
     public int TotalFrames { get; private set; }
     public TimeSpan AverageTimePerFrame { get; private set; }
 
-    public VideoFrameCaptureManager(TimeSpan endTime, TimeSpan startTime, TilingOptions tilingOptions)
+    public VideoFrameCaptureManager(
+        VideoFrameExtractor frameExtractor, 
+        TimeSpan endTime, 
+        TimeSpan startTime, 
+        TilingOptions tilingOptions)
     {
         _endTime = endTime;
         _startTime = startTime;
         _tilingOptions = tilingOptions;
+        _frameExtractor = frameExtractor;
 
         if (_endTime > _frameExtractor.Duration)
         {
@@ -38,7 +43,7 @@ public class VideoFrameCaptureManager
 
     public IEnumerable<Frame> PerformFrameCapture()
     {
-        var frames = new List<Frame>(TotalFrames);
+        var frames = new Frame[TotalFrames];
 
         for (var row = 0; row < _tilingOptions.Rows; row++)
         {
