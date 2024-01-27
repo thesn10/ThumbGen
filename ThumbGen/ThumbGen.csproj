@@ -4,6 +4,10 @@
     <TargetFramework>net8.0</TargetFramework>
     <OutputType>Library</OutputType>
 	<Nullable>enable</Nullable>
+	<Authors>TheSN</Authors>
+	<Copyright>Free Use</Copyright>
+	<RepositoryUrl>https://github.com/thesn10/ThumbGen</RepositoryUrl>
+	<Description>Customizable cross-platform blazing-fast video thumbnail generator with many options for .NET 8</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
