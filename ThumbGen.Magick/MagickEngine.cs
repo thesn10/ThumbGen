@@ -41,21 +41,27 @@ namespace ThumbGen.Magick
 
         public void DrawTimeCode(string tsString, string fontFamily, float fontSize, float originX, float originY, SizeF frameSize)
         {
-            var textRealSize = new Size(); //graphics.MeasureString(tsString, textFont);
+            var settings = new MagickReadSettings
+            {
+                Font = "Consolas",
+                TextGravity = Gravity.Center,
+                BackgroundColor = MagickColors.Transparent,
+                FillColor = _colorOpts.TimeCodeColor,
+                FillPattern = _colorOpts.TimeCodeImage,
+                FontPointsize = (double)fontSize,
+                Density = new Density(120), // TODO
+            };
 
-            var textx = originX + frameSize.Width - textRealSize.Width;
-            var texty = originY + frameSize.Height - textRealSize.Height;
+            using var caption = new MagickImage($"caption:{tsString}", settings);
+
+            var textX = originX + frameSize.Width - caption.Width;
+            var textY = originY + frameSize.Height - caption.Height;
 
             DrawBgImageOrColor(_image, _colorOpts.TimeCodeBgImage, _colorOpts.TimeCodeBgColor)
-                .Rectangle(originX, originY, textRealSize.Width, textRealSize.Height)
+                .Rectangle(textX, textY, textX + caption.Width, textY + caption.Height)
                 .Draw(_image);
 
-            DrawBgImageOrColor(_image, _colorOpts.TimeCodeImage, _colorOpts.TimeCodeColor)
-                .FontPointSize((double)fontSize)
-                .Font("Consolas")
-                .TextAlignment(TextAlignment.Left)
-                .Text(textx, texty, tsString)
-                .Draw(_image);
+            _image.Composite(caption, (int)textX, (int)textY, CompositeOperator.Over);
         }
 
         public IThumbnailResult Finish()
