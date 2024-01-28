@@ -24,7 +24,6 @@ namespace ThumbGen.SystemDrawing
             _timeCodeBrush = MapToBrush(opts.TimeCodeGradient, opts.TimeCodeColor);
         }
 
-
         public IThumbnailEngine CreateNew()
         {
             var bitmap = new Bitmap(_size.Width, _size.Height);

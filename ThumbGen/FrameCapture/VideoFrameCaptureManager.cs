@@ -52,15 +52,14 @@ public class VideoFrameCaptureManager
                 var frameNr = column + row * _tilingOptions.Columns;
                 var frameTime = _startTime + AverageTimePerFrame * frameNr;
 
-                var bmp = _frameExtractor.GetAtTimestamp(frameTime, out var frameTs);
+                var videoFrame = _frameExtractor.GetAtTimestamp(frameTime, out var frameTs);
 
-                if (bmp is null)
+                if (videoFrame is null)
                 {
-                    // TODO
-                    throw new InvalidOperationException("Bitmap was null");
+                    throw new Exception("Video frame was null");
                 }
 
-                frames[frameNr] = new Frame(bmp, frameTs, row, column);
+                frames[frameNr] = new Frame(videoFrame, frameTs, row, column);
             }
         }
 

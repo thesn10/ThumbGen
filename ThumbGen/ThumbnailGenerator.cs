@@ -36,8 +36,6 @@ public class ThumbnailGenerator
 
     public IThumbnailResult GenerateThumbnail()
     {
-        // background
-        //graphics.FillRectangle(_bgBrush, 0, 0, _totalSize.Width, _totalSize.Height);
         var thumbnailEngine = _thumbnailEngineFactory.CreateNew();
 
         var frames = _frameCapture.PerformFrameCapture();
@@ -59,7 +57,6 @@ public class ThumbnailGenerator
                 {
                     if (_thumbGenOptions.AspectOverlap)
                         thumbnailEngine.DrawAspectOverlap(x, y, width, height);
-                        //graphics.FillRectangle(_aspectOverlapBrush, x, y, width, height);
 
                     if (aspect > frameAspect)
                     {
@@ -75,7 +72,6 @@ public class ThumbnailGenerator
             }
 
             thumbnailEngine.DrawImage(frame.VideoFrame, x, y, width, height);
-            //graphics.DrawImage(frame.VideoFrame.ToBitmap(), x, y, width, height);
             frame.VideoFrame.Dispose();
 
             if (_thumbGenOptions.TimeCodeFontSize is not null)
@@ -85,6 +81,25 @@ public class ThumbnailGenerator
 
                 thumbnailEngine.DrawTimeCode(tsString, "Consolas", fontSize, originX, originY, _frameSize);
             }
+        }
+
+        if (_thumbGenOptions.WatermarkFilename is not null &&
+            _thumbGenOptions.WatermarkSize is not null &&
+            _thumbGenOptions.WatermarkPosition is not null)
+        {
+            var watermarkWidth = _thumbGenOptions.WatermarkSize.Value.Width;
+            var watermarkHeight = _thumbGenOptions.WatermarkSize.Value.Height;
+            var (watermarkX, watermarkY) = _thumbGenOptions.WatermarkPosition.Value switch
+            {
+                WatermarkPosition.Center => ((_totalSize.Width - watermarkWidth) / 2, (_totalSize.Height - watermarkHeight) / 2),
+                WatermarkPosition.TopLeft => (0, 0),
+                WatermarkPosition.TopRight => (_totalSize.Width - watermarkWidth, 0),
+                WatermarkPosition.BottomLeft => (0, _totalSize.Height - watermarkHeight),
+                WatermarkPosition.BottomRight => (_totalSize.Width - watermarkWidth, _totalSize.Height - watermarkHeight),
+                _ => throw new NotImplementedException(),
+            };
+
+            thumbnailEngine.DrawWatermark(_thumbGenOptions.WatermarkFilename, watermarkX, watermarkY, watermarkWidth, watermarkHeight);
         }
 
         return thumbnailEngine.Finish();

@@ -30,6 +30,9 @@ namespace ThumbGen.Builder
         internal Color? TimeCodeBgColor { get; set; } = Color.Black;
         internal Color? TimeCodeColor { get; set; } = Color.White;
         internal LinearGradient? TimeCodeGradient { get; set; }
+        internal string? WatermarkFilename { get; set; }
+        internal Size? WatermarkSize { get; set; }
+        internal WatermarkPosition? WatermarkPosition { get; set; }
 
         public ThumbGenOptions(string filename)
         {
@@ -70,6 +73,14 @@ namespace ThumbGen.Builder
         public ThumbGenOptions PreserveFrameAspect(bool preserveAspect = true)
         {
             PreserveAspect = preserveAspect;
+            return this;
+        }
+
+        public ThumbGenOptions WithWatermark(string filename, int width, int height, WatermarkPosition position = Builder.WatermarkPosition.BottomRight)
+        {
+            WatermarkFilename = filename;
+            WatermarkSize = new Size(width, height);
+            WatermarkPosition = position;
             return this;
         }
 
@@ -252,38 +263,6 @@ namespace ThumbGen.Builder
                 totalSize.Height = (int)Math.Round(totalFrameHeight + totalBorderHeight);
             }
 
-
-            /*if (_size.Width >= 0)
-                {
-                    totalSize.Width = _size.Width;
-                    var totalBorderWidth = (columns + 1) * _borderSize.Width;
-                    var totalFrameWidth = _size.Width - totalBorderWidth;
-                    frameSize.Width = (totalFrameWidth / 3);
-                }
-                else
-                {
-                    frameSize.Width = _frameExtractor.Width;
-                    var totalBorderWidth = (columns + 1) * _borderSize.Width;
-                    var totalFrameWidth = columns * _frameExtractor.Width;
-                    totalSize.Width = totalFrameWidth + totalBorderWidth;
-                }
-
-                int rows = _tilingOptions.Rows;
-
-                if (_size.Height >= 0)
-                {
-                    totalSize.Height = _size.Height;
-                    var totalBorderHeight = (columns + 1) * _borderSize.Height;
-                    var totalFrameHeight = _size.Height - totalBorderHeight;
-                    frameSize.Height = (totalFrameHeight / 3);
-                }
-                else
-                {
-                    frameSize.Height = _frameExtractor.Height;
-                    var totalBorderHeight = (rows + 1) * _borderSize.Height;
-                    var totalFrameHeight = rows * _frameExtractor.Height;
-                    totalSize.Height = totalFrameHeight + totalBorderHeight;
-                }*/
             return new ThumbnailSizing(totalSize, frameSize, borderSize);
         }
     }

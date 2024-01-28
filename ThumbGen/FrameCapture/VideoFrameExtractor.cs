@@ -9,9 +9,9 @@ namespace ThumbGen.FrameCapture
         private readonly MediaReader _reader;
 
         public bool FastMode { get; set; }
-        public int Width { get; set; }
-        public int Height { get; set; }
-        public TimeSpan Duration { get; set; }
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+        public TimeSpan Duration { get; private set; }
 
         public VideoFrameExtractor(string filename)
         {
@@ -38,15 +38,21 @@ namespace ThumbGen.FrameCapture
             while (true)
             {
                 var ret = _reader.ReadPacket(packet);
+                if (ret == ffmpeg.AVERROR_EOF)
+                {
+                    throw new Exception("Reached end of file finding vaild frame");
+                }
+
                 if (ret < 0 && ret != ffmpeg.AVERROR_EOF)
                 {
                     throw new FFmpegException(ret);
                 }
 
-                var decoder = _reader[packet.StreamIndex].Codec as MediaDecoder;
-                if (decoder.SendPacket(packet) < 0)
+                var decoder = (MediaDecoder)_reader[packet.StreamIndex].Codec;
+                ret = decoder.SendPacket(packet);
+                if (ret < 0)
                 {
-                    return null;
+                    throw new FFmpegException(ret);
                 }
 
                 var frame = new VideoFrame();

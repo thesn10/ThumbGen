@@ -64,6 +64,23 @@ namespace ThumbGen.Magick
             _image.Composite(caption, (int)textX, (int)textY, CompositeOperator.Over);
         }
 
+        public void DrawWatermark(string watermarkFilename, float x, float y, float width, float height)
+        {
+            var image = new MagickImage(watermarkFilename, new MagickReadSettings()
+            {
+                BackgroundColor = MagickColors.None,
+            });
+
+            var geo = new MagickGeometry((int)width, (int)height)
+            {
+                IgnoreAspectRatio = true,
+                FillArea = true,
+            };
+            image.Resize(geo);
+
+            _image.Composite(image, (int)x, (int)y, CompositeOperator.Over);
+        }
+
         public IThumbnailResult Finish()
         {
             return new MagickThumbnailResult(_image);

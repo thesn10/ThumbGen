@@ -2,7 +2,6 @@
 using System.Drawing;
 using System.Runtime.Versioning;
 using ThumbGen.Engine;
-using ThumbGen.FrameCapture;
 
 namespace ThumbGen.SystemDrawing
 {
@@ -20,6 +19,7 @@ namespace ThumbGen.SystemDrawing
         {
             _bitmap = bitmap;
             _graphics = Graphics.FromImage(bitmap);
+            _graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             _graphics.FillRectangle(bgBrush, 0, 0, _bitmap.Width, _bitmap.Height);
 
             _aspectOverlapBrush = aspectOverlapBrush;
@@ -46,6 +46,12 @@ namespace ThumbGen.SystemDrawing
             var texty = originY + frameSize.Height - textRealSize.Height;
             _graphics.FillRectangle(_timeCodeBgBrush, textx, texty, textRealSize.Width, textRealSize.Height);
             _graphics.DrawString(tsString, textFont, _timeCodeBrush, textx, texty);
+        }
+
+        public void DrawWatermark(string watermarkFilename, float x, float y, float width, float height)
+        {
+            var image = Image.FromFile(watermarkFilename);
+            _graphics.DrawImage(image, x, y, width, height);
         }
 
         public IThumbnailResult Finish()
