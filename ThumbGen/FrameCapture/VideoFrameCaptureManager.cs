@@ -7,60 +7,51 @@ namespace ThumbGen.FrameCapture;
 public class VideoFrameCaptureManager
 {
     private readonly VideoFrameExtractor _frameExtractor;
-    private readonly TimeSpan _endTime;
-    private readonly TimeSpan _startTime;
-    private readonly TilingOptions _tilingOptions;
 
-    public int TotalFrames { get; private set; }
-    public TimeSpan AverageTimePerFrame { get; private set; }
+    public TimeSpan Duration => _frameExtractor.Duration;
 
     public VideoFrameCaptureManager(
-        VideoFrameExtractor frameExtractor, 
-        TimeSpan endTime, 
-        TimeSpan startTime, 
-        TilingOptions tilingOptions)
+        VideoFrameExtractor frameExtractor)
     {
-        _endTime = endTime;
-        _startTime = startTime;
-        _tilingOptions = tilingOptions;
         _frameExtractor = frameExtractor;
+    }
 
-        if (_endTime > _frameExtractor.Duration)
+    public IReadOnlyList<Frame> PerformFrameCapture(
+        TimeSpan? endTime,
+        TimeSpan? startTime,
+        int totalFrames)
+    {
+        var frames = new Frame[totalFrames];
+
+        if (startTime is null)
+            startTime = TimeSpan.Zero;
+
+        if (endTime is null)
+            endTime = _frameExtractor.Duration;
+
+        if (endTime > _frameExtractor.Duration)
         {
             throw new InvalidOperationException("EndTime is larger than duration");
         }
 
-        if (_startTime > _frameExtractor.Duration)
+        if (startTime > _frameExtractor.Duration)
         {
             throw new InvalidOperationException("StartTime is larger than duration");
         }
 
-        TotalFrames = _tilingOptions.Rows * _tilingOptions.Columns;
-        AverageTimePerFrame = (_endTime - _startTime) / TotalFrames;
-    }
+        var averageTimePerFrame = (endTime.Value - startTime.Value) / totalFrames;
 
-    public TimeSpan CalculateFrameTime(int frameNr) => _startTime + AverageTimePerFrame * frameNr;
-
-    public IEnumerable<Frame> PerformFrameCapture()
-    {
-        var frames = new Frame[TotalFrames];
-
-        for (var row = 0; row < _tilingOptions.Rows; row++)
+        for (var frameNr = 0; frameNr < totalFrames; frameNr++)
         {
-            for (var column = 0; column < _tilingOptions.Columns; column++)
+            var frameTime = startTime.Value + averageTimePerFrame * frameNr;
+            var videoFrame = _frameExtractor.GetAtTimestamp(frameTime, out var frameTs);
+
+            if (videoFrame is null)
             {
-                var frameNr = column + row * _tilingOptions.Columns;
-                var frameTime = _startTime + AverageTimePerFrame * frameNr;
-
-                var videoFrame = _frameExtractor.GetAtTimestamp(frameTime, out var frameTs);
-
-                if (videoFrame is null)
-                {
-                    throw new Exception("Video frame was null");
-                }
-
-                frames[frameNr] = new Frame(videoFrame, frameTs, row, column);
+                throw new Exception("Video frame was null");
             }
+
+            frames[frameNr] = new Frame(videoFrame, frameTs);
         }
 
         return frames;

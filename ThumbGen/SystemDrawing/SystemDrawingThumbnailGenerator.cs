@@ -10,12 +10,14 @@ namespace ThumbGen.SystemDrawing
         public static ThumbnailGenerator Create(string input, ThumbGenOptions opts)
         {
             var frameExtractor = new VideoFrameExtractor(input);
+            var frameCapture = new VideoFrameCaptureManager(frameExtractor);
 
             var sizing = opts.CalcSizes(frameExtractor.Width, frameExtractor.Height);
 
             var engine = new SystemDrawingEngineFactory(opts);
+            var renderer = new ThumbnailRenderer(opts, engine, sizing);
 
-            return new ThumbnailGenerator(frameExtractor, opts, engine, sizing);
+            return new ThumbnailGenerator(frameCapture, renderer, opts);
         }
     }
 }

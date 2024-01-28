@@ -20,7 +20,7 @@ namespace ThumbGen.App
 
             var input = Path.GetFullPath("./video.webm");//Path.GetFullPath("./video.webm");
             var opts = new ThumbGenOptions(input)
-                //.WithStartTime(TimeSpan.FromSeconds(60))
+                .WithStartTime(TimeSpan.FromSeconds(60))
                 //.WithEndTime(TimeSpan.FromMinutes(4))
                 .WithSize(new Size(1920, 1080))
                 .WithTiling(options =>
@@ -33,7 +33,8 @@ namespace ThumbGen.App
                 .WithBorder(new Size(8, 8), true)
                 .UseBackgroundGradient(
                     new LinearGradient(Color.Cyan, Color.Blue, 45))
-                //.WithTimeCode(14f)
+                //.WithWatermark("./logo.svg", 605, 178, WatermarkPosition.Center)
+                .WithTimeCode(14f)
                 //.UseTimecodeBackgroundColor(Color.Black)
                 .UseFastMode();
 
@@ -59,25 +60,7 @@ namespace ThumbGen.App
             stopwatch.Stop();
             Console.WriteLine("Magick: " + stopwatch.Elapsed.ToString());
 
-            thumbnail.SaveToFile(output2);
-
-
-            var color1 = MagickColorUtil.FromColor(Color.Black);
-            var color2 = MagickColorUtil.FromColor(Color.White);
-
-            var settings = new MagickReadSettings()
-            {
-                Width = 1920,
-                Height = 1080,
-            };
-            settings.SetDefine(MagickFormat.Gradient, "angle", 45);
-
-            var gradientTest = $"gradient:{color1}-{color2}";
-            Console.WriteLine(gradientTest);
-            //var gradientTest2 = $"gradient:#FFFFFFFFFFFFFFFF-#0000000000000000";
-            //Console.WriteLine(gradientTest2);
-            var image2 = new MagickImage(gradientTest, settings);
-            image2.Write(Path.GetFullPath("./gradient2.jpg"));
+            thumbnail2.SaveToFile(output2);
         }
     }
 }
