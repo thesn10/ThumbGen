@@ -15,9 +15,9 @@ namespace ThumbGen.SystemDrawing
         private readonly Brush _timeCodeBrush;
         private readonly Size _size;
 
-        public SystemDrawingEngineFactory(ThumbGenOptions opts)
+        public SystemDrawingEngineFactory(ThumbGenOptions opts, Size totalSize)
         {
-            _size = opts.Size;
+            _size = totalSize;
             _bgBrush = MapToBrush(opts.BgGradient, opts.BgColor);
             _aspectOverlapBrush = MapToBrush(opts.AspectOverlapGradient, opts.AspectOverlapColor);
             _timeCodeBgBrush = MapToBrush(opts.TimeCodeBgGradient, opts.TimeCodeBgColor);

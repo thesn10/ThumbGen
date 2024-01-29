@@ -12,9 +12,9 @@ namespace ThumbGen.SystemDrawing
             var frameExtractor = new VideoFrameExtractor(input);
             var frameCapture = new VideoFrameCaptureManager(frameExtractor);
 
-            var sizing = opts.CalcSizes(frameExtractor.Width, frameExtractor.Height);
+            var sizing = opts.CalcSizes2(frameExtractor.Width, frameExtractor.Height);
 
-            var engine = new SystemDrawingEngineFactory(opts);
+            var engine = new SystemDrawingEngineFactory(opts, sizing.TotalSize);
             var renderer = new ThumbnailRenderer(opts, engine, sizing);
 
             return new ThumbnailGenerator(frameCapture, renderer, opts);

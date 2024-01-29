@@ -12,9 +12,9 @@ namespace ThumbGen.Magick
         private readonly MagickImage? _bgImage;
         private readonly Size _size;
 
-        public MagickEngineFactory(ThumbGenOptions opts)
+        public MagickEngineFactory(ThumbGenOptions opts, Size totalSize)
         {
-            _size = opts.Size;
+            _size = totalSize;
             _colorOpts = new MagickEngineColorOptions()
             {
                 AspectOverlapColor = GetColor(opts.AspectOverlapColor),

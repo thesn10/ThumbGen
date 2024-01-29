@@ -11,8 +11,9 @@ namespace ThumbGen.Builder
     {
         internal string Filename { get; }
         internal bool ConstantBorder { get; set; }
-        internal SizeF BorderSize { get; set; } = new SizeF(0, 0);
-        internal Size Size { get; set; } = new Size(-1, -1);
+        internal Size BorderSize { get; set; } = new Size(0, 0);
+        internal Size? Size { get; set; } = null;
+        internal Size? FrameSize { get; set; } = null;
         internal Color? BgColor { get; set; }
         internal LinearGradient? BgGradient { get; set; }
         internal TilingOptions TilingOptions1 { get; } = new TilingOptions();
@@ -42,6 +43,7 @@ namespace ThumbGen.Builder
         public ThumbGenOptions WithSize(Size size)
         {
             Size = size;
+            FrameSize = null;
             return this;
         }
 
@@ -141,7 +143,8 @@ namespace ThumbGen.Builder
         /// <returns></returns>
         public ThumbGenOptions WithFrameSize(int width = -1, int height = -1)
         {
-            Size = new Size(width, height);
+            Size = null;
+            FrameSize = new Size(width, height);
             return this;
         }
 
@@ -214,53 +217,76 @@ namespace ThumbGen.Builder
             var rows = TilingOptions1.Rows;
             var frameAspect = width / (float)height;
 
-            if (Size.Height >= 0 && Size.Width >= 0)
-            {
-                totalSize.Width = Size.Width;
-                var totalBorderWidth = (columns + 1) * BorderSize.Width;
-                var totalFrameWidth = Size.Width - totalBorderWidth;
-                frameSize.Width = (totalFrameWidth / columns);
+            var totalBorderWidth = (columns + 1) * BorderSize.Width;
+            var totalBorderHeight = (rows + 1) * BorderSize.Height;
 
-                totalSize.Height = Size.Height;
-                var totalBorderHeight = (rows + 1) * BorderSize.Height;
-                var totalFrameHeight = Size.Height - totalBorderHeight;
-                frameSize.Height = (totalFrameHeight / rows);
-            }
-            else if (Size.Height >= 0)
+            if (Size is null)
+                throw new InvalidOperationException();
+
+            if (Size.Value.Height >= 0 && Size.Value.Width >= 0)
             {
-                totalSize.Height = Size.Height;
-                var totalBorderHeight = (rows + 1) * BorderSize.Height;
-                var totalFrameHeight = Size.Height - totalBorderHeight;
-                frameSize.Height = (totalFrameHeight / rows);
+                totalSize.Width = Size.Value.Width;
+                frameSize.Width = (Size.Value.Width - totalBorderWidth) / columns;
+
+                totalSize.Height = Size.Value.Height;
+                frameSize.Height = (Size.Value.Height - totalBorderHeight) / rows;
+            }
+            else if (Size.Value.Height >= 0)
+            {
+                totalSize.Height = Size.Value.Height;
+                frameSize.Height = (Size.Value.Height - totalBorderHeight) / rows;
 
                 frameSize.Width = frameSize.Height * frameAspect;
-                var totalBorderWidth = (columns + 1) * BorderSize.Width;
-                var totalFrameWidth = columns * frameSize.Width;
-                totalSize.Width = (int)Math.Round(totalFrameWidth + totalBorderWidth);
+                totalSize.Width = (int)Math.Round(columns * frameSize.Width + totalBorderWidth);
             }
-            else if (Size.Width >= 0)
+            else if (Size.Value.Width >= 0)
             {
-                totalSize.Width = Size.Width;
-                var totalBorderWidth = (columns + 1) * BorderSize.Width;
-                var totalFrameWidth = Size.Width - totalBorderWidth;
-                frameSize.Width = (totalFrameWidth / columns);
+                totalSize.Width = Size.Value.Width;
+                frameSize.Width = (Size.Value.Width - totalBorderWidth) / columns;
 
                 frameSize.Height = frameSize.Width / frameAspect;
-                var totalBorderHeight = (rows + 1) * BorderSize.Height;
-                var totalFrameHeight = rows * frameSize.Height;
-                totalSize.Height = (int)Math.Round(totalFrameHeight + totalBorderHeight);
+                totalSize.Height = (int)Math.Round(rows * frameSize.Height + totalBorderHeight);
             }
             else
             {
                 frameSize.Width = width;
-                var totalBorderWidth = (columns + 1) * BorderSize.Width;
-                var totalFrameWidth = columns * width;
-                totalSize.Width = (int)Math.Round(totalFrameWidth + totalBorderWidth);
+                totalSize.Width = columns * width + totalBorderWidth;
 
                 frameSize.Height = height;
-                var totalBorderHeight = (rows + 1) * BorderSize.Height;
-                var totalFrameHeight = rows * height;
-                totalSize.Height = (int)Math.Round(totalFrameHeight + totalBorderHeight);
+                totalSize.Height = rows * height + totalBorderHeight;
+            }
+
+            return new ThumbnailSizing(totalSize, frameSize, borderSize);
+        }
+
+        internal ThumbnailSizing CalcSizes2(int width, int height)
+        {
+            var totalSize = new Size();
+            var frameSize = new SizeF();
+            var borderSize = BorderSize;
+
+            var columns = TilingOptions1.Columns;
+            var rows = TilingOptions1.Rows;
+
+            var totalBorderWidth = (columns + 1) * BorderSize.Width;
+            var totalBorderHeight = (rows + 1) * BorderSize.Height;
+
+
+            if (Size is not null)
+            {
+                totalSize.Width = Size.Value.Width;
+                frameSize.Width = (totalSize.Width - totalBorderWidth) / (float)columns;
+
+                totalSize.Height = Size.Value.Height;
+                frameSize.Height = (totalSize.Height - totalBorderHeight) / (float)rows;
+            }
+            else if (FrameSize is not null)
+            {
+                frameSize.Width = FrameSize.Value.Width;
+                totalSize.Width = columns * FrameSize.Value.Width + totalBorderWidth;
+
+                frameSize.Height = FrameSize.Value.Height;
+                totalSize.Height = rows * FrameSize.Value.Height + totalBorderHeight;
             }
 
             return new ThumbnailSizing(totalSize, frameSize, borderSize);

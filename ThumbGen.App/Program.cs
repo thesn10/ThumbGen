@@ -22,7 +22,8 @@ namespace ThumbGen.App
             var opts = new ThumbGenOptions(input)
                 .WithStartTime(TimeSpan.FromSeconds(60))
                 //.WithEndTime(TimeSpan.FromMinutes(4))
-                .WithSize(new Size(1920, 1080))
+                //.WithSize(new Size(1920, 1080))
+                .WithFrameSize(192 * 3, 108 * 3)
                 .WithTiling(options =>
                 {
                     options.Columns = 4;

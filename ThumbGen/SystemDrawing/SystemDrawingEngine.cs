@@ -19,7 +19,7 @@ namespace ThumbGen.SystemDrawing
         {
             _bitmap = bitmap;
             _graphics = Graphics.FromImage(bitmap);
-            _graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            _graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighSpeed;
             _graphics.FillRectangle(bgBrush, 0, 0, _bitmap.Width, _bitmap.Height);
 
             _aspectOverlapBrush = aspectOverlapBrush;
