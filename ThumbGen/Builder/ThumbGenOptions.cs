@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
+using System.Reflection;
 using ThumbGen.Options;
+using ThumbGen.Util;
 
 namespace ThumbGen.Builder
 {
@@ -9,61 +12,34 @@ namespace ThumbGen.Builder
 
     public class ThumbGenOptions
     {
-        internal string Filename { get; }
-        internal bool ConstantBorder { get; set; }
-        internal Size BorderSize { get; set; } = new Size(0, 0);
-        internal Size? Size { get; set; } = null;
-        internal Size? FrameSize { get; set; } = null;
-        internal Color? BgColor { get; set; }
-        internal LinearGradient? BgGradient { get; set; }
-        internal TilingOptions TilingOptions1 { get; } = new TilingOptions();
+        internal Func<int, string> GetFilePath { get; set; } = (index) => FilePathWithIndex(index, "thumbnail.jpg");
+        internal Func<string, int, string> GetWebVTTImageUrl { get; set; } = (imagePath, index) => Path.GetFileName(imagePath);
+        internal string WebVTTFilename { get; set; } = "storyboard.vtt";
+        internal bool GenerateWebVTT { get; set; } = false;
+
+        internal int? TotalFrames { get; set; }
+        internal TimeSpan? Interval { get; set; }
         internal TimeSpan? StartTime { get; set; }
         internal TimeSpan? EndTime { get; set; }
-        internal bool PreserveAspect { get; set; } = true;
-        internal bool AspectOverlap { get; set; } = true;
         internal bool FastMode { get; private set; }
         internal double? EndTimePercent { get; private set; }
         internal double? StartTimePercent { get; private set; }
-        internal float? TimeCodeFontSize { get; private set; }
-        internal LinearGradient? AspectOverlapGradient { get; set; }
-        internal Color? AspectOverlapColor { get; set; } = Color.Black;
-        internal LinearGradient? TimeCodeBgGradient { get; set; }
-        internal Color? TimeCodeBgColor { get; set; } = Color.Black;
-        internal Color? TimeCodeColor { get; set; } = Color.White;
-        internal LinearGradient? TimeCodeGradient { get; set; }
-        internal string? WatermarkFilename { get; set; }
-        internal Size? WatermarkSize { get; set; }
-        internal WatermarkPosition? WatermarkPosition { get; set; }
 
-        public ThumbGenOptions(string filename)
-        {
-            Filename = filename;
-        }
+        internal RenderingOptions RenderingOptions { get; } = new RenderingOptions();
 
-        public ThumbGenOptions WithSize(Size size)
+        public ThumbGenOptions WithFilename(string filepath)
         {
-            Size = size;
-            FrameSize = null;
+            GetFilePath = (index) => FilePathWithIndex(index, filepath);
             return this;
         }
 
-        public ThumbGenOptions UseBackgroundColor(Color color)
+        public ThumbGenOptions WithWebVTT(string? filepath = null, Func<string, int, string>? getImageUrl = null)
         {
-            BgColor = color;
-            BgGradient = null;
-            return this;
-        }
-
-        public ThumbGenOptions UseBackgroundGradient(LinearGradient gradient)
-        {
-            BgColor = null;
-            BgGradient = gradient;
-            return this;
-        }
-
-        public ThumbGenOptions WithOutputSize(int width = -1, int height = -1)
-        {
-            Size = new Size(width, height);
+            GenerateWebVTT = true;
+            if (filepath is not null)
+                WebVTTFilename = filepath;
+            if (getImageUrl is not null)
+                GetWebVTTImageUrl = getImageUrl;
             return this;
         }
 
@@ -72,92 +48,9 @@ namespace ThumbGen.Builder
             return this;
         }
 
-        public ThumbGenOptions PreserveFrameAspect(bool preserveAspect = true)
+        public ThumbGenOptions WithInterval(TimeSpan interval)
         {
-            PreserveAspect = preserveAspect;
-            return this;
-        }
-
-        public ThumbGenOptions WithWatermark(string filename, int width, int height, WatermarkPosition position = Builder.WatermarkPosition.BottomRight)
-        {
-            WatermarkFilename = filename;
-            WatermarkSize = new Size(width, height);
-            WatermarkPosition = position;
-            return this;
-        }
-
-
-        public ThumbGenOptions UseAspectOverlap(bool aspectOverlap = true)
-        {
-            AspectOverlap = true;
-            return this;
-        }
-
-        public ThumbGenOptions UseAspectOverlapColor(Color color)
-        {
-            AspectOverlapColor = color;
-            AspectOverlapGradient = null;
-            return this;
-        }
-
-        public ThumbGenOptions UseAspectOverlapGradient(LinearGradient gradient)
-        {
-            AspectOverlapColor = null;
-            AspectOverlapGradient = gradient;
-            return this;
-        }
-
-        public ThumbGenOptions UseTimeCodeBackgroundColor(Color color)
-        {
-            TimeCodeBgColor = color;
-            TimeCodeBgGradient = null;
-            return this;
-        }
-
-        public ThumbGenOptions UseTimeCodeBackgroundGradient(LinearGradient gradient)
-        {
-            TimeCodeBgColor = null;
-            TimeCodeBgGradient = gradient;
-            return this;
-        }
-
-        public ThumbGenOptions UseTimeCodeColor(Color color)
-        {
-            TimeCodeColor = color;
-            TimeCodeGradient = null;
-            return this;
-        }
-
-        public ThumbGenOptions UseTimeCodeGradient(LinearGradient gradient)
-        {
-            TimeCodeColor = null;
-            TimeCodeGradient = gradient;
-            return this;
-        }
-
-        /// <summary>
-        /// The size of the captured frames from the video in the thumbnail. Does nothing if constant border is enabled
-        /// </summary>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <returns></returns>
-        public ThumbGenOptions WithFrameSize(int width = -1, int height = -1)
-        {
-            Size = null;
-            FrameSize = new Size(width, height);
-            return this;
-        }
-
-        public ThumbGenOptions WithBorder(Size borderSize, bool constant)
-        {
-            BorderSize = borderSize;
-            ConstantBorder = constant;
-            return this;
-        }
-
-        public ThumbGenOptions WithTiling(Action<TilingOptions> options) 
-        {
-            options(TilingOptions1);
+            Interval = interval;
             return this;
         }
 
@@ -195,101 +88,22 @@ namespace ThumbGen.Builder
             return this;
         }
 
-        public ThumbGenOptions WithTimeCode(float size)
-        {
-            TimeCodeFontSize = size;
-            return this;
-        }
-
         public ThumbGenOptions UseFastMode()
         {
             FastMode = true;
             return this;
         }
 
-        internal ThumbnailSizing CalcSizes(int width, int height)
+        public ThumbGenOptions WithRendering(Action<RenderingOptions> options)
         {
-            var totalSize = new Size();
-            var frameSize = new SizeF();
-            var borderSize = BorderSize;
-
-            var columns = TilingOptions1.Columns;
-            var rows = TilingOptions1.Rows;
-            var frameAspect = width / (float)height;
-
-            var totalBorderWidth = (columns + 1) * BorderSize.Width;
-            var totalBorderHeight = (rows + 1) * BorderSize.Height;
-
-            if (Size is null)
-                throw new InvalidOperationException();
-
-            if (Size.Value.Height >= 0 && Size.Value.Width >= 0)
-            {
-                totalSize.Width = Size.Value.Width;
-                frameSize.Width = (Size.Value.Width - totalBorderWidth) / columns;
-
-                totalSize.Height = Size.Value.Height;
-                frameSize.Height = (Size.Value.Height - totalBorderHeight) / rows;
-            }
-            else if (Size.Value.Height >= 0)
-            {
-                totalSize.Height = Size.Value.Height;
-                frameSize.Height = (Size.Value.Height - totalBorderHeight) / rows;
-
-                frameSize.Width = frameSize.Height * frameAspect;
-                totalSize.Width = (int)Math.Round(columns * frameSize.Width + totalBorderWidth);
-            }
-            else if (Size.Value.Width >= 0)
-            {
-                totalSize.Width = Size.Value.Width;
-                frameSize.Width = (Size.Value.Width - totalBorderWidth) / columns;
-
-                frameSize.Height = frameSize.Width / frameAspect;
-                totalSize.Height = (int)Math.Round(rows * frameSize.Height + totalBorderHeight);
-            }
-            else
-            {
-                frameSize.Width = width;
-                totalSize.Width = columns * width + totalBorderWidth;
-
-                frameSize.Height = height;
-                totalSize.Height = rows * height + totalBorderHeight;
-            }
-
-            return new ThumbnailSizing(totalSize, frameSize, borderSize);
+            options(RenderingOptions);
+            return this;
         }
 
-        internal ThumbnailSizing CalcSizes2(int width, int height)
+        private static string FilePathWithIndex(int index, string filepath)
         {
-            var totalSize = new Size();
-            var frameSize = new SizeF();
-            var borderSize = BorderSize;
-
-            var columns = TilingOptions1.Columns;
-            var rows = TilingOptions1.Rows;
-
-            var totalBorderWidth = (columns + 1) * BorderSize.Width;
-            var totalBorderHeight = (rows + 1) * BorderSize.Height;
-
-
-            if (Size is not null)
-            {
-                totalSize.Width = Size.Value.Width;
-                frameSize.Width = (totalSize.Width - totalBorderWidth) / (float)columns;
-
-                totalSize.Height = Size.Value.Height;
-                frameSize.Height = (totalSize.Height - totalBorderHeight) / (float)rows;
-            }
-            else if (FrameSize is not null)
-            {
-                frameSize.Width = FrameSize.Value.Width;
-                totalSize.Width = columns * FrameSize.Value.Width + totalBorderWidth;
-
-                frameSize.Height = FrameSize.Value.Height;
-                totalSize.Height = rows * FrameSize.Value.Height + totalBorderHeight;
-            }
-
-            return new ThumbnailSizing(totalSize, frameSize, borderSize);
+            if (index == 0) return filepath;
+            return FilenameUtils.ChangeFilename(filepath, oldName => oldName + index);
         }
     }
 }

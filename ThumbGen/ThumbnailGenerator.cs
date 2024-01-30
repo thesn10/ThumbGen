@@ -1,5 +1,9 @@
-﻿using ThumbGen.Builder;
-using ThumbGen.Engine;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using ThumbGen.Builder;
 using ThumbGen.FrameCapture;
 
 namespace ThumbGen;
@@ -22,16 +26,49 @@ public class ThumbnailGenerator
         _renderer = renderer;
     }
 
-    public IThumbnailResult GenerateThumbnail()
+    public async Task ExecuteAsync(CancellationToken ct = default)
     {
-        var endTime = _thumbGenOptions.EndTime ?? _thumbGenOptions.EndTimePercent * _frameCapture.Duration;
         var startTime = _thumbGenOptions.StartTime ?? _thumbGenOptions.StartTimePercent * _frameCapture.Duration;
+        var endTime = _thumbGenOptions.EndTime ?? _thumbGenOptions.EndTimePercent * _frameCapture.Duration;
 
-        var totalFrames = _thumbGenOptions.TilingOptions1.Rows * _thumbGenOptions.TilingOptions1.Columns;
-        var frames = _frameCapture.PerformFrameCapture(endTime, startTime, totalFrames);
+        var framesPerThumbnail = _thumbGenOptions.RenderingOptions.TilingOptions.Rows * _thumbGenOptions.RenderingOptions.TilingOptions.Columns;
+        var totalFrames = _thumbGenOptions.TotalFrames ?? framesPerThumbnail;
 
-        var thumbnail = _renderer.RenderThumbnailFromFrames(frames);
+        var allFrames = CaptureFramesAsync(startTime, endTime, totalFrames);
 
-        return thumbnail;
+        var webvttGenerator = await WebVTTGenerator.CreateAsync(_thumbGenOptions.WebVTTFilename, _frameCapture.Duration);
+
+        for (var thumbnailFileIndex = 0; ; thumbnailFileIndex++)
+        {
+            var startIndex = thumbnailFileIndex * framesPerThumbnail;
+            var frames = await allFrames.Skip(startIndex).Take(framesPerThumbnail).ToListAsync(ct);
+            if (frames.Count == 0)
+            {
+                break;
+            }
+
+            var renderResult = await Task.Run(() => _renderer.Render(frames));
+
+            var imageFilePath = _thumbGenOptions.GetFilePath(thumbnailFileIndex);
+
+            await renderResult.Image.SaveToFileAsync(imageFilePath);
+
+            var imageUrl = _thumbGenOptions.GetWebVTTImageUrl(imageFilePath, thumbnailFileIndex);
+            await webvttGenerator.AddCuesAsync(imageUrl, renderResult.FrameMetadata, ct);
+        }
+
+        await webvttGenerator.FinishAsync();
+    }
+
+    private IAsyncEnumerable<Frame> CaptureFramesAsync(TimeSpan? startTime, TimeSpan? endTime, int totalFrames)
+    {
+        if (_thumbGenOptions.Interval.HasValue)
+        {
+            return _frameCapture.PerformFrameCaptureAsync(_thumbGenOptions.Interval.Value, startTime, endTime, totalFrames);
+        }
+        else
+        {
+            return _frameCapture.PerformFrameCaptureAsync(totalFrames, startTime, endTime);
+        }
     }
 }

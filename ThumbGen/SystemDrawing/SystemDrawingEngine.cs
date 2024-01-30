@@ -54,7 +54,7 @@ namespace ThumbGen.SystemDrawing
             _graphics.DrawImage(image, x, y, width, height);
         }
 
-        public IThumbnailResult Finish()
+        public IThumbnailImage Finish()
         {
             _graphics.Flush();
             return new SystemDrawingThumbnailResult(_bitmap);

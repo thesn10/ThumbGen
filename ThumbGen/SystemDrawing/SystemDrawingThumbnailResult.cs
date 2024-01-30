@@ -1,10 +1,13 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 
 namespace ThumbGen.SystemDrawing
 {
     [SupportedOSPlatform("windows")]
-    internal class SystemDrawingThumbnailResult : IThumbnailResult
+    internal class SystemDrawingThumbnailResult : IThumbnailImage
     {
         private readonly Bitmap _bitmap;
 
@@ -16,6 +19,11 @@ namespace ThumbGen.SystemDrawing
         public void SaveToFile(string filePath)
         {
             _bitmap.Save(filePath);
+        }
+
+        public Task SaveToFileAsync(string filePath)
+        {
+            return Task.Run(() => _bitmap.Save(filePath));
         }
     }
 }

@@ -81,7 +81,7 @@ namespace ThumbGen.Magick
             _image.Composite(image, (int)x, (int)y, CompositeOperator.Over);
         }
 
-        public IThumbnailResult Finish()
+        public IThumbnailImage Finish()
         {
             return new MagickThumbnailResult(_image);
         }

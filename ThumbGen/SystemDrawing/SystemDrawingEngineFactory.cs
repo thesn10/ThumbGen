@@ -3,6 +3,7 @@ using System.Drawing.Drawing2D;
 using System.Runtime.Versioning;
 using ThumbGen.Builder;
 using ThumbGen.Engine;
+using ThumbGen.Options;
 
 namespace ThumbGen.SystemDrawing
 {
@@ -15,7 +16,7 @@ namespace ThumbGen.SystemDrawing
         private readonly Brush _timeCodeBrush;
         private readonly Size _size;
 
-        public SystemDrawingEngineFactory(ThumbGenOptions opts, Size totalSize)
+        public SystemDrawingEngineFactory(RenderingOptions opts, Size totalSize)
         {
             _size = totalSize;
             _bgBrush = MapToBrush(opts.BgGradient, opts.BgColor);

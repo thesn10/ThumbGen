@@ -2,6 +2,7 @@
 using System.Drawing;
 using ThumbGen.Builder;
 using ThumbGen.Engine;
+using ThumbGen.Options;
 
 namespace ThumbGen.Magick
 {
@@ -12,7 +13,7 @@ namespace ThumbGen.Magick
         private readonly MagickImage? _bgImage;
         private readonly Size _size;
 
-        public MagickEngineFactory(ThumbGenOptions opts, Size totalSize)
+        public MagickEngineFactory(RenderingOptions opts, Size totalSize)
         {
             _size = totalSize;
             _colorOpts = new MagickEngineColorOptions()

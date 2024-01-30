@@ -1,8 +1,9 @@
 ﻿using ImageMagick;
+using System.Drawing;
 
 namespace ThumbGen.Magick
 {
-    public class MagickThumbnailResult : IThumbnailResult
+    public class MagickThumbnailResult : IThumbnailImage
     {
         private readonly IMagickImage<byte> _image;
 
@@ -14,6 +15,11 @@ namespace ThumbGen.Magick
         public void SaveToFile(string filePath)
         {
             _image.Write(filePath);
+        }
+
+        public Task SaveToFileAsync(string filePath)
+        {
+            return _image.WriteAsync(filePath);
         }
     }
 }
