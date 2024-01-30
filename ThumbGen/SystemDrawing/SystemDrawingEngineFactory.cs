@@ -22,7 +22,7 @@ namespace ThumbGen.SystemDrawing
             _bgBrush = MapToBrush(opts.BgGradient, opts.BgColor);
             _aspectOverlapBrush = MapToBrush(opts.AspectOverlapGradient, opts.AspectOverlapColor);
             _timeCodeBgBrush = MapToBrush(opts.TimeCodeBgGradient, opts.TimeCodeBgColor);
-            _timeCodeBrush = MapToBrush(opts.TimeCodeGradient, opts.TimeCodeColor);
+            _timeCodeBrush = MapToBrush(opts.TimeCodeGradient, opts.TimeCodeColor, Color.White);
         }
 
         public IThumbnailEngine CreateNew()

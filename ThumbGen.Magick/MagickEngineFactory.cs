@@ -22,7 +22,7 @@ namespace ThumbGen.Magick
                 AspectOverlapImage = GetGradient(opts.AspectOverlapGradient),
                 TimeCodeBgColor = GetColor(opts.TimeCodeBgColor),
                 TimeCodeBgImage = GetGradient(opts.TimeCodeBgGradient),
-                TimeCodeColor = GetColor(opts.TimeCodeColor),
+                TimeCodeColor = GetColor(opts.TimeCodeColor, Color.White),
                 TimeCodeImage = GetGradient(opts.TimeCodeGradient),
             };
 
@@ -37,11 +37,13 @@ namespace ThumbGen.Magick
             return new MagickEngine(image, _colorOpts);
         }
 
-        private MagickColor? GetColor(Color? color)
+        private MagickColor? GetColor(Color? color, Color? defaultColor = null)
         {
             if (color is null)
             {
-                return null;
+                return defaultColor.HasValue ? 
+                    MagickColorUtil.FromColor(defaultColor.Value) : 
+                    MagickColors.Black;
             }
 
             return MagickColorUtil.FromColor(color.Value);
