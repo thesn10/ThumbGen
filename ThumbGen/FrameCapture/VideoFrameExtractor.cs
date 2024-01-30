@@ -31,7 +31,6 @@ namespace ThumbGen.FrameCapture
         public (VideoFrame, TimeSpan) GetAtTimestamp(TimeSpan ts)
         {
             _reader.Seek(ts);
-            var frameTs = ts;
 
             using var packet = new MediaPacket();
 
@@ -59,7 +58,7 @@ namespace ThumbGen.FrameCapture
 
                 while (decoder.ReceiveFrame(frame) >= 0)
                 {
-                    frameTs = _reader[packet.StreamIndex].ToTimeSpan(frame.Pts);
+                    var frameTs = _reader[packet.StreamIndex].ToTimeSpan(frame.Pts);
                     if (FastMode || frameTs >= ts)
                     {
                         return (frame, frameTs);
