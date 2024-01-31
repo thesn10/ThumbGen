@@ -121,7 +121,7 @@ namespace ThumbGen.Options
         }
 
         /// <summary>
-        /// The size of the captured frames from the video in the thumbnail. Does nothing if constant border is enabled
+        /// The size of the captured frames from the video in the thumbnail
         /// </summary>
         /// <param name="width"></param>
         /// <param name="height"></param>
