@@ -33,28 +33,24 @@ public class ThumbnailGenerator
 
         var framesPerThumbnail = _thumbGenOptions.RenderingOptions.TilingOptions.Rows * _thumbGenOptions.RenderingOptions.TilingOptions.Columns;
         var totalFrames = _thumbGenOptions.TotalFrames ?? framesPerThumbnail;
-
         var allFrames = CaptureFramesAsync(startTime, endTime, totalFrames);
 
         var webvttGenerator = await WebVTTGenerator.CreateAsync(_thumbGenOptions.WebVTTFilename, _frameCapture.Duration);
 
-        for (var thumbnailFileIndex = 0; ; thumbnailFileIndex++)
+        var thumbnailFileIndex = 0;
+        await foreach (var frames in allFrames.Buffer(framesPerThumbnail))
         {
-            var startIndex = thumbnailFileIndex * framesPerThumbnail;
-            var frames = await allFrames.Skip(startIndex).Take(framesPerThumbnail).ToListAsync(ct);
-            if (frames.Count == 0)
-            {
-                break;
-            }
+            if (frames.Count == 0) break;
 
-            var renderResult = await Task.Run(() => _renderer.Render(frames));
+            var renderResult = await Task.Run(() => _renderer.Render(frames.AsReadOnly()));
 
             var imageFilePath = _thumbGenOptions.GetFilePath(thumbnailFileIndex);
-
             await renderResult.Image.SaveToFileAsync(imageFilePath);
 
             var imageUrl = _thumbGenOptions.GetWebVTTImageUrl(imageFilePath, thumbnailFileIndex);
             await webvttGenerator.AddCuesAsync(imageUrl, renderResult.FrameMetadata, ct);
+
+            thumbnailFileIndex++;
         }
 
         await webvttGenerator.FinishAsync();
@@ -64,7 +60,7 @@ public class ThumbnailGenerator
     {
         if (_thumbGenOptions.Interval.HasValue)
         {
-            return _frameCapture.PerformFrameCaptureAsync(_thumbGenOptions.Interval.Value, startTime, endTime, totalFrames);
+            return _frameCapture.PerformFrameCaptureAsync(_thumbGenOptions.Interval.Value, startTime, endTime, _thumbGenOptions.TotalFrames);
         }
         else
         {
