@@ -86,16 +86,10 @@ namespace ThumbGen.Options
             return this;
         }
 
-        public RenderingOptions WithSize(Size size)
-        {
-            Size = size;
-            FrameSize = null;
-            return this;
-        }
-
         public RenderingOptions WithOutputSize(int width = -1, int height = -1)
         {
             Size = new Size(width, height);
+            FrameSize = null;
             return this;
         }
 

@@ -31,14 +31,13 @@ public class ThumbnailGenerator
         var startTime = _thumbGenOptions.StartTime ?? _thumbGenOptions.StartTimePercent * _frameCapture.Duration;
         var endTime = _thumbGenOptions.EndTime ?? _thumbGenOptions.EndTimePercent * _frameCapture.Duration;
 
-        var framesPerThumbnail = _thumbGenOptions.RenderingOptions.TilingOptions.Rows * _thumbGenOptions.RenderingOptions.TilingOptions.Columns;
-        var totalFrames = _thumbGenOptions.TotalFrames ?? framesPerThumbnail;
+        var totalFrames = _thumbGenOptions.TotalFrames ?? _renderer.FramesPerThumbnail;
         var allFrames = CaptureFramesAsync(startTime, endTime, totalFrames);
 
         var webvttGenerator = await CreateWebVTTOrDefault(ct);
 
         var thumbnailFileIndex = 0;
-        await foreach (var frames in allFrames.Buffer(framesPerThumbnail))
+        await foreach (var frames in allFrames.Buffer(_renderer.FramesPerThumbnail))
         {
             if (frames.Count == 0) break;
             if (ct.IsCancellationRequested) break;

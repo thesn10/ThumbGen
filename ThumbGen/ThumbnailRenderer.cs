@@ -28,6 +28,8 @@ namespace ThumbGen
             (_totalSize, _frameSize, _borderSize) = sizing;
         }
 
+        public int FramesPerThumbnail => _renderingOptions.TilingOptions.Rows * _renderingOptions.TilingOptions.Columns;
+
         public ThumbnailRenderResult Render(IReadOnlyList<Frame> frames)
         {
             var thumbnailEngine = _thumbnailEngineFactory.CreateNew();

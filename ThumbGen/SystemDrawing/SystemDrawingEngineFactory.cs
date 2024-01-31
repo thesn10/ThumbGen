@@ -1,7 +1,7 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Runtime.Versioning;
-using ThumbGen.Builder;
 using ThumbGen.Engine;
 using ThumbGen.Options;
 
@@ -16,8 +16,11 @@ namespace ThumbGen.SystemDrawing
         private readonly Brush _timeCodeBrush;
         private readonly Size _size;
 
-        public SystemDrawingEngineFactory(RenderingOptions opts, Size totalSize)
+        public SystemDrawingEngineFactory(RenderingOptions opts, Size totalSize, bool tryEnableUnixSupport = false)
         {
+            if (tryEnableUnixSupport)
+                AppContext.SetSwitch("System.Drawing.EnableUnixSupport", true); // only works for net 6 or lower
+
             _size = totalSize;
             _bgBrush = MapToBrush(opts.BgGradient, opts.BgColor);
             _aspectOverlapBrush = MapToBrush(opts.AspectOverlapGradient, opts.AspectOverlapColor);

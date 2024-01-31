@@ -25,7 +25,6 @@ namespace ThumbGen.Builder
         internal double? EndTimePercent { get; private set; }
         internal double? StartTimePercent { get; private set; }
 
-        internal RenderingOptions RenderingOptions { get; } = new RenderingOptions();
 
         public ThumbGenOptions WithFilename(string filepath)
         {
@@ -40,11 +39,6 @@ namespace ThumbGen.Builder
                 WebVTTFilename = filepath;
             if (getImageUrl is not null)
                 GetWebVTTImageUrl = getImageUrl;
-            return this;
-        }
-
-        public ThumbGenOptions WithOutputAspectRatio(double aspectRatio = 16d/9d)
-        {
             return this;
         }
 
@@ -91,12 +85,6 @@ namespace ThumbGen.Builder
         public ThumbGenOptions UseFastMode()
         {
             FastMode = true;
-            return this;
-        }
-
-        public ThumbGenOptions WithRendering(Action<RenderingOptions> options)
-        {
-            options(RenderingOptions);
             return this;
         }
 

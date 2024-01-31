@@ -28,7 +28,7 @@ namespace ThumbGen
         /// </param>
         public static Task<WebVTTGenerator> CreateAsync(string outputFileName, TimeSpan duration, string? textHeader = null, CancellationToken ct = default)
         {
-            var fileStream = File.Open(outputFileName, FileMode.Truncate, FileAccess.Write);
+            var fileStream = File.Open(outputFileName, FileMode.Create, FileAccess.Write);
             return CreateAsync(fileStream, duration, textHeader, ct);
         }
 

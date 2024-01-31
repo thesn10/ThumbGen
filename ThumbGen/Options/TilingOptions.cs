@@ -8,8 +8,5 @@ namespace ThumbGen.Options
     {
         public int Columns { get; set; } = 1;
         public int Rows { get; set; } = 1;
-        public bool AspectOverlap { get; set; } = true;
-        public bool AutoFrameDistance { get; set; } = true;
-        public TimeSpan FrameDistance { get; set; }
     }
 }

@@ -11,14 +11,8 @@ namespace ThumbGen
     {
         public VideoFrameCaptureManager? FrameCaptureManager { get; set; }
         public ThumbnailRenderer? Renderer { get; set; }
-        public ThumbGenOptions Options { get; init; }
 
-        public ThumbnailGeneratorBuilder(ThumbGenOptions opts)
-        {
-            Options = opts;
-        }
-
-        public static ThumbnailGeneratorBuilder Create(ThumbGenOptions opts) => new ThumbnailGeneratorBuilder(opts);
+        public static ThumbnailGeneratorBuilder Create() => new ThumbnailGeneratorBuilder();
 
         public ThumbnailGeneratorBuilder WithFFMpegVideoCapture(string input)
         {
@@ -30,23 +24,40 @@ namespace ThumbGen
         }
 
         [SupportedOSPlatform("windows")]
-        public ThumbnailGeneratorBuilder UseSystemDrawingRenderer()
+        public ThumbnailGeneratorBuilder UseSystemDrawingRenderer(RenderingOptions opts)
         {
-            var sizing = Options.RenderingOptions.CalcSizes2();
+            var sizing = opts.CalcSizes2();
 
-            var engine = new SystemDrawingEngineFactory(Options.RenderingOptions, sizing.TotalSize);
-            var renderer = new ThumbnailRenderer(Options.RenderingOptions, engine, sizing);
+            var engine = new SystemDrawingEngineFactory(opts, sizing.TotalSize);
+            var renderer = new ThumbnailRenderer(opts, engine, sizing);
 
             Renderer = renderer;
             return this;
         }
 
-        public ThumbnailGenerator Build()
+        [SupportedOSPlatform("windows")]
+        public ThumbnailGeneratorBuilder UseSystemDrawingRenderer(Action<RenderingOptions> configure)
+        {
+            var opts = new RenderingOptions();
+            configure(opts);
+
+            return UseSystemDrawingRenderer(opts);
+        }
+
+        public ThumbnailGenerator Build(ThumbGenOptions opts)
         {
             ArgumentNullException.ThrowIfNull(FrameCaptureManager);
             ArgumentNullException.ThrowIfNull(Renderer);
 
-            return new ThumbnailGenerator(FrameCaptureManager, Renderer, Options);
+            return new ThumbnailGenerator(FrameCaptureManager, Renderer, opts);
+        }
+
+        public ThumbnailGenerator Build(Action<ThumbGenOptions> configure)
+        {
+            var opts = new ThumbGenOptions();
+            configure(opts);
+
+            return Build(opts);
         }
     }
 }

@@ -5,15 +5,23 @@ namespace ThumbGen
 {
     public static class ThumbnailGeneratorExtensions
     {
-        public static ThumbnailGeneratorBuilder UseMagickRenderer(this ThumbnailGeneratorBuilder builder)
+        public static ThumbnailGeneratorBuilder UseMagickRenderer(this ThumbnailGeneratorBuilder builder, RenderingOptions opts)
         {
-            var sizing = builder.Options.RenderingOptions.CalcSizes2();
+            var sizing = opts.CalcSizes2();
 
-            var engine = new MagickEngineFactory(builder.Options.RenderingOptions, sizing.TotalSize);
-            var renderer = new ThumbnailRenderer(builder.Options.RenderingOptions, engine, sizing);
+            var engine = new MagickEngineFactory(opts, sizing.TotalSize);
+            var renderer = new ThumbnailRenderer(opts, engine, sizing);
 
             builder.Renderer = renderer;
             return builder;
+        }
+
+        public static ThumbnailGeneratorBuilder UseMagickRenderer(this ThumbnailGeneratorBuilder builder, Action<RenderingOptions> configure)
+        {
+            var opts = new RenderingOptions();
+            configure(opts);
+
+            return UseMagickRenderer(builder, opts);
         }
     }
 }
