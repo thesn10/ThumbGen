@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipelines;
 using System.Linq;
-using System.Reflection.PortableExecutable;
-using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,6 +14,7 @@ namespace ThumbGen
     {
         private readonly PipeWriter _output;
         private readonly TimeSpan _duration;
+        private (string imageUrl, ThumbnailFrameMetadata frameMetadata)? _pendingCue;
 
         internal WebVTTGenerator(PipeWriter output, TimeSpan duration)
         {
@@ -74,19 +73,29 @@ namespace ThumbGen
             {
                 var frame = frameMetadata[i];
                 var nextFrame = frameMetadata.ElementAtOrDefault(i + 1);
+                var endTimestamp = nextFrame?.Timestamp;
 
-                var start = frame.Timestamp;
-                var end = nextFrame?.Timestamp ?? _duration;
+                // process cached cue first
+                if (_pendingCue is not null)
+                {
+                    var (pendingCueImageUrl, pendingCueFrame) = _pendingCue.Value;
+                    var pendingCueResult = await AddCueAsync(pendingCueImageUrl, pendingCueFrame, frame.Timestamp, ct);
+                    _pendingCue = null;
 
-                var webvttSection = $"""
+                    if (pendingCueResult.IsCanceled || pendingCueResult.IsCompleted)
+                    {
+                        return;
+                    }
+                }
 
-                    {start:hh\:mm\:ss\.fff} --> {end:hh\:mm\:ss\.fff}
-                    {imageUrl}#xywh={frame.X},{frame.Y},{frame.Width},{frame.Height}
+                if (endTimestamp is null)
+                {
+                    // we do not know endTimestamp, so cache cue until we know it
+                    _pendingCue = (imageUrl, frame);
+                    break;
+                }
 
-                    """;
-                Encoding.UTF8.GetBytes(webvttSection.AsSpan(), _output);
-
-                var result = await _output.FlushAsync(ct);
+                var result = await AddCueAsync(imageUrl, frame, endTimestamp.Value, ct);
 
                 if (result.IsCanceled || result.IsCompleted)
                 {
@@ -95,9 +104,33 @@ namespace ThumbGen
             }
         }
 
-        public ValueTask FinishAsync()
+        private async Task<FlushResult> AddCueAsync(string imageUrl, ThumbnailFrameMetadata frame, TimeSpan end, CancellationToken ct = default)
         {
-            return _output.CompleteAsync();
+            var start = frame.Timestamp;
+
+            var webvttSection = $"""
+
+                    {start:hh\:mm\:ss\.fff} --> {end:hh\:mm\:ss\.fff}
+                    {imageUrl}#xywh={frame.X},{frame.Y},{frame.Width},{frame.Height}
+
+                    """;
+            Encoding.UTF8.GetBytes(webvttSection.AsSpan(), _output);
+
+            var result = await _output.FlushAsync(ct);
+            return result;
+        }
+
+        public async Task FinishAsync()
+        {
+            if (_pendingCue is not null)
+            {
+                var (pendingCueImageUrl, pendingCueFrame) = _pendingCue.Value;
+                await AddCueAsync(pendingCueImageUrl, pendingCueFrame, _duration);
+
+                _pendingCue = null;
+            }
+
+            await _output.CompleteAsync();
         }
     }
 }
