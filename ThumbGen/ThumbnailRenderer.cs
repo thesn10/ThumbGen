@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using ThumbGen.Builder;
 using ThumbGen.Engine;
 using ThumbGen.FrameCapture;
@@ -30,7 +33,7 @@ namespace ThumbGen
 
         public int FramesPerThumbnail => _renderingOptions.TilingOptions.Rows * _renderingOptions.TilingOptions.Columns;
 
-        public ThumbnailRenderResult Render(IReadOnlyList<Frame> frames)
+        public ThumbnailRenderResult Render(IReadOnlyList<Frame> frames, CancellationToken ct = default)
         {
             var thumbnailEngine = _thumbnailEngineFactory.CreateNew();
             var frameMetadata = new List<ThumbnailFrameMetadata>();
@@ -88,6 +91,9 @@ namespace ThumbGen
 
                         thumbnailEngine.DrawTimeCode(tsString, "Consolas", fontSize, originX, originY, _frameSize);
                     }
+
+                    if (ct.IsCancellationRequested) 
+                        throw new OperationCanceledException();
                 }
             }
 
@@ -113,6 +119,34 @@ namespace ThumbGen
             var image = thumbnailEngine.Finish();
 
             return new ThumbnailRenderResult(image, frameMetadata);
+        }
+
+        public Task<ThumbnailRenderResult> RenderAsync(IReadOnlyList<Frame> frames, CancellationToken ct = default)
+        {
+            return Task.Run(() => Render(frames, ct), ct);
+        }
+
+        public async IAsyncEnumerable<ThumbnailRenderResult> RenderMultipleAsync(
+            IAsyncEnumerable<Frame> frames, 
+            [EnumeratorCancellation]CancellationToken ct = default)
+        {
+            await foreach (var currentFrames in frames.Buffer(FramesPerThumbnail).WithCancellation(ct))
+            {
+                if (currentFrames.Count == 0) break;
+                if (ct.IsCancellationRequested) break;
+
+                ThumbnailRenderResult renderResult;
+                try
+                {
+                    renderResult = await RenderAsync(currentFrames.AsReadOnly(), ct);
+                }
+                catch (OperationCanceledException)
+                {
+                    yield break;
+                }
+
+                yield return renderResult;
+            }
         }
     }
 }

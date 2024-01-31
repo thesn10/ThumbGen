@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using ThumbGen.Options;
 
@@ -68,20 +70,22 @@ public class VideoFrameCaptureManager
     public IAsyncEnumerable<Frame> PerformFrameCaptureAsync(
         int totalFrames,
         TimeSpan? startTime = null,
-        TimeSpan? endTime = null)
+        TimeSpan? endTime = null,
+        CancellationToken ct = default)
     {
         EnsureTimeSpansNotNull(ref startTime, ref endTime);
 
         var averageTimePerFrame = (endTime.Value - startTime.Value) / totalFrames;
 
-        return PerformFrameCaptureAsync(averageTimePerFrame, startTime, endTime, totalFrames);
+        return PerformFrameCaptureAsync(averageTimePerFrame, startTime, endTime, totalFrames, ct);
     }
 
     public async IAsyncEnumerable<Frame> PerformFrameCaptureAsync(
         TimeSpan interval,
         TimeSpan? startTime = null,
         TimeSpan? endTime = null,
-        int? maxFrames = null)
+        int? maxFrames = null,
+        [EnumeratorCancellation]CancellationToken ct = default)
     {
         EnsureTimeSpansNotNull(ref startTime, ref endTime);
 
@@ -92,6 +96,9 @@ public class VideoFrameCaptureManager
 
         for (var frameNr = 0; frameNr < maxFrames; frameNr++)
         {
+            if (ct.IsCancellationRequested) 
+                yield break;
+
             var frameTime = startTime.Value + interval * frameNr;
 
             if (frameTime > endTime)

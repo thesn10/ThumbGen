@@ -32,17 +32,14 @@ public class ThumbnailGenerator
         var endTime = _thumbGenOptions.EndTime ?? _thumbGenOptions.EndTimePercent * _frameCapture.Duration;
 
         var totalFrames = _thumbGenOptions.TotalFrames ?? _renderer.FramesPerThumbnail;
-        var allFrames = CaptureFramesAsync(startTime, endTime, totalFrames);
+        var allFrames = CaptureFramesAsync(startTime, endTime, totalFrames, ct);
 
         var webvttGenerator = await CreateWebVTTOrDefault(ct);
 
         var thumbnailFileIndex = 0;
-        await foreach (var frames in allFrames.Buffer(_renderer.FramesPerThumbnail))
+        await foreach (var renderResult in _renderer.RenderMultipleAsync(allFrames, ct))
         {
-            if (frames.Count == 0) break;
-            if (ct.IsCancellationRequested) break;
-
-            var renderResult = await Task.Run(() => _renderer.Render(frames.AsReadOnly()));
+            if (ct.IsCancellationRequested) return;
 
             var imageFilePath = _thumbGenOptions.GetFilePath(thumbnailFileIndex);
             await renderResult.Image.SaveToFileAsync(imageFilePath);
@@ -58,15 +55,17 @@ public class ThumbnailGenerator
             await webvttGenerator.FinishAsync();
     }
 
-    private IAsyncEnumerable<Frame> CaptureFramesAsync(TimeSpan? startTime, TimeSpan? endTime, int totalFrames)
+    private IAsyncEnumerable<Frame> CaptureFramesAsync(
+        TimeSpan? startTime, TimeSpan? endTime, 
+        int totalFrames, CancellationToken ct = default)
     {
         if (_thumbGenOptions.Interval.HasValue)
         {
-            return _frameCapture.PerformFrameCaptureAsync(_thumbGenOptions.Interval.Value, startTime, endTime, _thumbGenOptions.TotalFrames);
+            return _frameCapture.PerformFrameCaptureAsync(_thumbGenOptions.Interval.Value, startTime, endTime, _thumbGenOptions.TotalFrames, ct);
         }
         else
         {
-            return _frameCapture.PerformFrameCaptureAsync(totalFrames, startTime, endTime);
+            return _frameCapture.PerformFrameCaptureAsync(totalFrames, startTime, endTime, ct);
         }
     }
 

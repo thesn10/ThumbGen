@@ -40,7 +40,7 @@ public class ThumbnailGeneratorTests
 
         var thumbnailGenerator = ThumbnailGeneratorBuilder
             .Create()
-            .WithFFMpegVideoCapture("input_video.mp4")
+            .WithFFMpegVideoCapture(VideoConstants.Video_360p_MP4())
             .UseSystemDrawingRenderer(renderingOpts)
             // or
             //.UseMagickRenderer(renderingOpts)
