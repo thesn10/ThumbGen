@@ -22,30 +22,34 @@ namespace ThumbGen.App
             var input = Path.GetFullPath("./video.webm");//Path.GetFullPath("./video.webm");
             var opts = new ThumbGenOptions()
                 .WithStartTime(TimeSpan.FromSeconds(60))
+                .WithInterval(TimeSpan.FromSeconds(5))
                 //.WithEndTime(TimeSpan.FromMinutes(4))
                 //.WithSize(new Size(1920, 1080))
                 .WithRendering(opts => opts
-                    .WithFrameSize(192 * 3, 108 * 3)
+                    .WithFrameSize(192, 108)
                     .WithTiling(options =>
                     {
                         options.Columns = 4;
                         options.Rows = 4;
                         options.AspectOverlap = true;
                     })
-                    .PreserveFrameAspect(false)
-                    .WithBorder(new Size(8, 8))
-                    .UseBackgroundGradient(
-                        new LinearGradient(Color.Cyan, Color.Blue, 45))
+                    .PreserveFrameAspect(false))
+                    //.WithBorder(new Size(8, 8))
+                    //.UseBackgroundGradient(
+                    //    new LinearGradient(Color.Cyan, Color.Blue, 45))
                     //.WithWatermark("./logo.svg", 605, 178, WatermarkPosition.Center)
-                    .WithTimeCode(14f))
+                    //.WithTimeCode(14f))
                     //.UseTimecodeBackgroundColor(Color.Black)
                 .UseFastMode()
                 .WithWebVTT("storyboard.vtt", (imagePath, index) => "/media/" + Path.GetFileName(imagePath));
 
             Stopwatch stopwatch = Stopwatch.StartNew();
 
-            await SystemDrawingThumbnailGenerator
-                .Create(input, opts.WithFilename(Path.GetFullPath("./thumbnail_systemdrawing.bmp")))
+            await ThumbnailGeneratorBuilder
+                .Create(opts.WithFilename(Path.GetFullPath("./thumbnail_systemdrawing.bmp")))
+                .WithFFMpegVideoCapture(input)
+                .UseSystemDrawingRenderer()
+                .Build()
                 .ExecuteAsync();
 
             stopwatch.Stop();
@@ -53,8 +57,11 @@ namespace ThumbGen.App
 
             stopwatch.Restart();
 
-            await MagickThumbnailGenerator
-                .Create(input, opts.WithFilename(Path.GetFullPath("./thumbnail_magick.jpg")))
+            await ThumbnailGeneratorBuilder
+                .Create(opts.WithFilename(Path.GetFullPath("./thumbnail_magick.jpg")))
+                .WithFFMpegVideoCapture(input)
+                .UseMagickRenderer()
+                .Build()
                 .ExecuteAsync();
 
             stopwatch.Stop();

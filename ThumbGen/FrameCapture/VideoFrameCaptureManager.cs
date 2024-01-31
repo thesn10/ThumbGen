@@ -11,6 +11,8 @@ public class VideoFrameCaptureManager
     private readonly VideoFrameExtractor _frameExtractor;
 
     public TimeSpan Duration => _frameExtractor.Duration;
+    public int Width => _frameExtractor.Width;
+    public int Height => _frameExtractor.Height;
 
     public VideoFrameCaptureManager(
         VideoFrameExtractor frameExtractor)

@@ -203,7 +203,7 @@ namespace ThumbGen.Options
             return new ThumbnailSizing(totalSize, frameSize, borderSize);
         }
 
-        internal ThumbnailSizing CalcSizes2(int width, int height)
+        internal ThumbnailSizing CalcSizes2()
         {
             var totalSize = new Size();
             var frameSize = new SizeF();
