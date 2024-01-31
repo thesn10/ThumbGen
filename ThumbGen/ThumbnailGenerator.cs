@@ -35,7 +35,7 @@ public class ThumbnailGenerator
         var totalFrames = _thumbGenOptions.TotalFrames ?? framesPerThumbnail;
         var allFrames = CaptureFramesAsync(startTime, endTime, totalFrames);
 
-        var webvttGenerator = await WebVTTGenerator.CreateAsync(_thumbGenOptions.WebVTTFilename, _frameCapture.Duration, ct: ct);
+        var webvttGenerator = await CreateWebVTTOrDefault(ct);
 
         var thumbnailFileIndex = 0;
         await foreach (var frames in allFrames.Buffer(framesPerThumbnail))
@@ -49,12 +49,14 @@ public class ThumbnailGenerator
             await renderResult.Image.SaveToFileAsync(imageFilePath);
 
             var imageUrl = _thumbGenOptions.GetWebVTTImageUrl(imageFilePath, thumbnailFileIndex);
-            await webvttGenerator.AddCuesAsync(imageUrl, renderResult.FrameMetadata, ct);
+            if (webvttGenerator is not null)
+                await webvttGenerator.AddCuesAsync(imageUrl, renderResult.FrameMetadata, ct);
 
             thumbnailFileIndex++;
         }
 
-        await webvttGenerator.FinishAsync();
+        if (webvttGenerator is not null)
+            await webvttGenerator.FinishAsync();
     }
 
     private IAsyncEnumerable<Frame> CaptureFramesAsync(TimeSpan? startTime, TimeSpan? endTime, int totalFrames)
@@ -67,5 +69,14 @@ public class ThumbnailGenerator
         {
             return _frameCapture.PerformFrameCaptureAsync(totalFrames, startTime, endTime);
         }
+    }
+
+    private Task<WebVTTGenerator?> CreateWebVTTOrDefault(CancellationToken ct = default)
+    {
+        if (_thumbGenOptions.GenerateWebVTT)
+        {
+            return WebVTTGenerator.CreateAsync(_thumbGenOptions.WebVTTFilename, _frameCapture.Duration, ct: ct)!;
+        }
+        return Task.FromResult<WebVTTGenerator?>(null);
     }
 }
