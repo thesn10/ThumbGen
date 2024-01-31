@@ -35,12 +35,13 @@ public class ThumbnailGenerator
         var totalFrames = _thumbGenOptions.TotalFrames ?? framesPerThumbnail;
         var allFrames = CaptureFramesAsync(startTime, endTime, totalFrames);
 
-        var webvttGenerator = await WebVTTGenerator.CreateAsync(_thumbGenOptions.WebVTTFilename, _frameCapture.Duration);
+        var webvttGenerator = await WebVTTGenerator.CreateAsync(_thumbGenOptions.WebVTTFilename, _frameCapture.Duration, ct: ct);
 
         var thumbnailFileIndex = 0;
         await foreach (var frames in allFrames.Buffer(framesPerThumbnail))
         {
             if (frames.Count == 0) break;
+            if (ct.IsCancellationRequested) break;
 
             var renderResult = await Task.Run(() => _renderer.Render(frames.AsReadOnly()));
 
