@@ -10,7 +10,7 @@ using ThumbGen.Engine;
 using ThumbGen.FrameCapture;
 using ThumbGen.Options;
 
-namespace ThumbGen
+namespace ThumbGen.Renderer
 {
     public class ThumbnailRenderer
     {
@@ -92,7 +92,7 @@ namespace ThumbGen
                         canvas.DrawTimeCode(tsString, "Consolas", fontSize, originX, originY, _frameSize);
                     }
 
-                    if (ct.IsCancellationRequested) 
+                    if (ct.IsCancellationRequested)
                         throw new OperationCanceledException();
                 }
             }
@@ -127,8 +127,8 @@ namespace ThumbGen
         }
 
         public async IAsyncEnumerable<ThumbnailRenderResult> RenderMultipleAsync(
-            IAsyncEnumerable<Frame> frames, 
-            [EnumeratorCancellation]CancellationToken ct = default)
+            IAsyncEnumerable<Frame> frames,
+            [EnumeratorCancellation] CancellationToken ct = default)
         {
             await foreach (var currentFrames in frames.Buffer(FramesPerThumbnail).WithCancellation(ct))
             {

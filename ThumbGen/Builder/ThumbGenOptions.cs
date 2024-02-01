@@ -24,11 +24,17 @@ namespace ThumbGen.Builder
         internal bool FastMode { get; private set; }
         internal double? EndTimePercent { get; private set; }
         internal double? StartTimePercent { get; private set; }
+        internal string InputFilePath { get; private set; }
 
-
-        public ThumbGenOptions WithFilename(string filepath)
+        public ThumbGenOptions WithOutputFilename(string filepath)
         {
             GetFilePath = (index) => FilePathWithIndex(index, filepath);
+            return this;
+        }
+
+        public ThumbGenOptions WithInputFilename(string filepath)
+        {
+            InputFilePath = filepath;
             return this;
         }
 

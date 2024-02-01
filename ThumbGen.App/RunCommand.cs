@@ -13,7 +13,7 @@ namespace ThumbGen.App
                 .WithStartTime(options.StartTime)
                 .WithInterval(options.Interval)
                 .WithEndTime(options.EndTime)
-                .WithFilename(options.Filename)
+                .WithOutputFilename(options.Filename)
                 .UseFastMode()
                 .WithWebVTT(options.WebVTT.FullName, (imgPath, index) => options.ImagePath);
 
@@ -32,11 +32,11 @@ namespace ThumbGen.App
 
             var thumbnailGenerator = ThumbnailGeneratorBuilder
                 .Create()
-                .WithFFMpegVideoCapture("video.webm")
+                .WithFFmpegVideoCapture("video.webm")
                 .UseSystemDrawingRenderer(renderingOpts)
-                .Build(opts);
+                .Build();
 
-            await thumbnailGenerator.ExecuteAsync();
+            await thumbnailGenerator.ExecuteAsync(opts);
 
             return 0;
         }

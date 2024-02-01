@@ -1,5 +1,6 @@
 ﻿using ThumbGen.Magick;
 using ThumbGen.Options;
+using ThumbGen.Renderer;
 
 namespace ThumbGen
 {
@@ -7,12 +8,14 @@ namespace ThumbGen
     {
         public static ThumbnailGeneratorBuilder UseMagickRenderer(this ThumbnailGeneratorBuilder builder, RenderingOptions opts)
         {
-            var sizing = opts.CalcSizes2();
+            builder.RendererFactory = (width, height) =>
+            {
+                var sizing = opts.CalcSizes2(width, height);
 
-            var engine = new MagickThumbnailRenderEngine(opts, sizing.TotalSize);
-            var renderer = new ThumbnailRenderer(opts, engine, sizing);
-
-            builder.Renderer = renderer;
+                var engine = new MagickThumbnailRenderEngine(opts, sizing.TotalSize);
+                var renderer = new ThumbnailRenderer(opts, engine, sizing);
+                return renderer;
+            };
             return builder;
         }
 
