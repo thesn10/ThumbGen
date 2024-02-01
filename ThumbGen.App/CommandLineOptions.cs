@@ -12,8 +12,11 @@ public static class CommandLineOptions
         new Option<TimeSpan>("--interval", () => TimeSpan.FromSeconds(5), "Interval");
     public static Option<TimeSpan> EndTimeOption { get; } = 
         new Option<TimeSpan>("--end-time", () => TimeSpan.FromMinutes(4), "End time");
-    public static Option<string> FilenameOption { get; } = 
-        new Option<string>("--filename", () => Path.GetFullPath("./thumbnail_systemdrawing.bmp"), "Output filename");
+
+    public static Argument<FileInfo> InputFileArgument { get; } =
+        new Argument<FileInfo>("input-file", () => new FileInfo("./thumbnail_systemdrawing.bmp"), "Input filename");
+    public static Argument<FileInfo> OutputFileArgument { get; } = 
+        new Argument<FileInfo>("output-file", () => new FileInfo("./thumbnail_systemdrawing.bmp"), "Output filename");
     public static Option<bool> FastModeOption { get; } = 
         new Option<bool>("--fast-mode", "Use fast mode");
     public static Option<FileInfo> WebVTTOption { get; } = 

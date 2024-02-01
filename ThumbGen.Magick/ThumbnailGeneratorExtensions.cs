@@ -6,25 +6,18 @@ namespace ThumbGen
 {
     public static class ThumbnailGeneratorExtensions
     {
-        public static ThumbnailGeneratorBuilder UseMagickRenderer(this ThumbnailGeneratorBuilder builder, RenderingOptions opts)
+        public static ThumbnailGeneratorBuilder UseMagickRenderer(this ThumbnailGeneratorBuilder builder)
         {
-            builder.RendererFactory = (width, height) =>
+            builder.RendererFactory = (opts, videoSize) =>
             {
-                var sizing = opts.CalcSizes2(width, height);
+                var sizing = opts.CalcSizes2(videoSize.Width, videoSize.Height);
 
                 var engine = new MagickThumbnailRenderEngine(opts, sizing.TotalSize);
                 var renderer = new ThumbnailRenderer(opts, engine, sizing);
                 return renderer;
             };
+
             return builder;
-        }
-
-        public static ThumbnailGeneratorBuilder UseMagickRenderer(this ThumbnailGeneratorBuilder builder, Action<RenderingOptions> configure)
-        {
-            var opts = new RenderingOptions();
-            configure(opts);
-
-            return UseMagickRenderer(builder, opts);
         }
     }
 }

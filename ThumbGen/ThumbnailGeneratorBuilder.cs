@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Runtime.Versioning;
 using ThumbGen.Builder;
 using ThumbGen.FrameCapture;
@@ -10,51 +11,64 @@ namespace ThumbGen
 {
     public class ThumbnailGeneratorBuilder
     {
-        public VideoFrameCaptureManager? FrameCaptureManager { get; set; }
-        public Func<int, int, ThumbnailRenderer>? RendererFactory { get; set; }
+        private RenderingOptions _renderingOptions = new RenderingOptions();
+
+        public Func<string, VideoFrameCaptureManager>? FrameCaptureManagerFactory { get; set; }
+        public Func<RenderingOptions, Size, ThumbnailRenderer>? RendererFactory { get; set; }
 
         public static ThumbnailGeneratorBuilder Create() => new ThumbnailGeneratorBuilder();
 
-        public ThumbnailGeneratorBuilder WithFFmpegVideoCapture(string input)
+        public ThumbnailGeneratorBuilder WithFFmpegVideoCapture()
         {
-            var frameExtractor = new VideoFrameExtractor(input);
-            var frameCapture = new VideoFrameCaptureManager(frameExtractor);
+            FrameCaptureManagerFactory = (input) =>
+            {
+                var frameExtractor = new VideoFrameExtractor(input);
+                var frameCapture = new VideoFrameCaptureManager(frameExtractor); 
+                return frameCapture;
+            };
 
-            FrameCaptureManager = frameCapture;
             return this;
         }
 
         [SupportedOSPlatform("windows")]
-        public ThumbnailGeneratorBuilder UseSystemDrawingRenderer(RenderingOptions opts)
+        public ThumbnailGeneratorBuilder UseSystemDrawingRenderer()
         {
-            RendererFactory = (width, height) =>
+            RendererFactory = (opts, videoSize) =>
             {
-                var sizing = opts.CalcSizes2(width, height);
+                var sizing = opts.CalcSizes2(videoSize.Width, videoSize.Height);
 
                 var engine = new SystemDrawingRenderEngine(opts, sizing.TotalSize);
                 var renderer = new ThumbnailRenderer(opts, engine, sizing);
                 return renderer;
             };
+
             return this;
         }
 
-        [SupportedOSPlatform("windows")]
-        public ThumbnailGeneratorBuilder UseSystemDrawingRenderer(Action<RenderingOptions> configure)
+        public ThumbnailGeneratorBuilder ConfigureRendering(Action<RenderingOptions> configure)
         {
-            var opts = new RenderingOptions();
-            configure(opts);
+            configure(_renderingOptions);
 
-            return UseSystemDrawingRenderer(opts);
+            return this;
         }
 
-        public ThumbnailGenerator Build()
+        public ThumbnailGeneratorBuilder ConfigureRendering(RenderingOptions options)
         {
-            ArgumentNullException.ThrowIfNull(FrameCaptureManager);
+            _renderingOptions = options;
+
+            return this;
+        }
+
+        public ThumbnailGenerator Build(string inputFilePath)
+        {
+            ArgumentNullException.ThrowIfNull(FrameCaptureManagerFactory);
             ArgumentNullException.ThrowIfNull(RendererFactory);
 
-            var renderer = RendererFactory(FrameCaptureManager.Width, FrameCaptureManager.Height);
+            var frameCaptureManager = FrameCaptureManagerFactory(inputFilePath);
+            var videoSize = new Size(frameCaptureManager.Width, frameCaptureManager.Height);
+            var renderer = RendererFactory(_renderingOptions, videoSize);
 
-            return new ThumbnailGenerator(FrameCaptureManager, renderer);
+            return new ThumbnailGenerator(frameCaptureManager, renderer);
         }
     }
 }

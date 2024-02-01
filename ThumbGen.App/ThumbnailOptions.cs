@@ -8,7 +8,8 @@ public class ThumbnailOptions
     public TimeSpan StartTime { get; set; }
     public TimeSpan Interval { get; set; }
     public TimeSpan EndTime { get; set; }
-    public string Filename { get; set; }
+    public FileInfo OutputFile { get; set; }
+    public FileInfo InputFile { get; set; }
     public bool FastMode { get; set; }
     public FileInfo WebVTT { get; set; }
     public string ImagePath { get; set; }
@@ -19,5 +20,4 @@ public class ThumbnailOptions
     public int BorderWidth { get; set; }
     public string BackgroundGradientStart { get; set; }
     public string BackgroundGradientEnd { get; set; }
-    // Add other rendering options here
 }

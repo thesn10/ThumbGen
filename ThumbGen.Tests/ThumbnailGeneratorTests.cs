@@ -39,19 +39,19 @@ public class ThumbnailGeneratorTests
 
         var thumbnailGenerator = ThumbnailGeneratorBuilder
             .Create()
-            .WithFFmpegVideoCapture(VideoConstants.Video_360p_MP4())
-            .UseSystemDrawingRenderer(renderingOpts)
-            // or
-            //.UseMagickRenderer(renderingOpts)
-            .Build();
+            .WithFFmpegVideoCapture()
+            .UseSystemDrawingRenderer()
+            .ConfigureRendering(renderingOpts)
+            .Build(VideoConstants.Video_360p_MP4());
 
         await thumbnailGenerator.ExecuteAsync(opts);
 
         await ThumbnailGeneratorBuilder
             .Create()
-            .WithFFmpegVideoCapture(VideoConstants.Video_360p_MP4())
-            .UseMagickRenderer(renderingOpts)
-            .Build()
+            .WithFFmpegVideoCapture()
+            .UseMagickRenderer()
+            .ConfigureRendering(renderingOpts)
+            .Build(VideoConstants.Video_360p_MP4())
             .ExecuteAsync(opts.WithOutputFilename(Path.GetFullPath("./thumbnail_magick.jpg")));
     }
 
@@ -88,9 +88,10 @@ public class ThumbnailGeneratorTests
 
         var generator = ThumbnailGeneratorBuilder
             .Create()
-            .WithFFmpegVideoCapture(VideoConstants.Video_360p_MP4())
-            .UseMagickRenderer(renderingOpts)
-            .Build();
+            .WithFFmpegVideoCapture()
+            .UseMagickRenderer()
+            .ConfigureRendering(renderingOpts)
+            .Build(VideoConstants.Video_360p_MP4());
 
         await generator.ExecuteAsync(opts.WithOutputFilename(Path.GetFullPath("./thumbnail_parralel1.jpg")));
         await generator.ExecuteAsync(opts.WithOutputFilename(Path.GetFullPath("./thumbnail_parralel2.jpg")));
