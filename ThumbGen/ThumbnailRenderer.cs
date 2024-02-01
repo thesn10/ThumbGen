@@ -15,7 +15,7 @@ namespace ThumbGen
     public class ThumbnailRenderer
     {
         private readonly RenderingOptions _renderingOptions;
-        private readonly IThumbnailEngineFactory _thumbnailEngineFactory;
+        private readonly IThumbnailRenderEngine _thumbnailRenderEngine;
 
         private readonly Size _totalSize;
         private readonly SizeF _frameSize;
@@ -23,11 +23,11 @@ namespace ThumbGen
 
         internal ThumbnailRenderer(
             RenderingOptions thumbGenOptions,
-            IThumbnailEngineFactory thumbnailEngine,
+            IThumbnailRenderEngine thumbnailEngine,
             ThumbnailSizing sizing)
         {
             _renderingOptions = thumbGenOptions;
-            _thumbnailEngineFactory = thumbnailEngine;
+            _thumbnailRenderEngine = thumbnailEngine;
             (_totalSize, _frameSize, _borderSize) = sizing;
         }
 
@@ -35,7 +35,7 @@ namespace ThumbGen
 
         public ThumbnailRenderResult Render(IReadOnlyList<Frame> frames, CancellationToken ct = default)
         {
-            var thumbnailEngine = _thumbnailEngineFactory.CreateNew();
+            var canvas = _thumbnailRenderEngine.CreateCanvas();
             var frameMetadata = new List<ThumbnailFrameMetadata>();
 
             for (var row = 0; row < _renderingOptions.TilingOptions.Rows; row++)
@@ -64,7 +64,7 @@ namespace ThumbGen
                         if (Math.Abs(aspect - frameAspect) > 0.01)
                         {
                             if (_renderingOptions.AspectOverlap)
-                                thumbnailEngine.DrawAspectOverlap(x, y, width, height);
+                                canvas.DrawAspectOverlap(x, y, width, height);
 
                             if (aspect > frameAspect)
                             {
@@ -79,7 +79,7 @@ namespace ThumbGen
                         }
                     }
 
-                    thumbnailEngine.DrawImage(frame.VideoFrame, x, y, width, height);
+                    canvas.DrawImage(frame.VideoFrame, x, y, width, height);
                     frame.VideoFrame.Dispose();
 
                     frameMetadata.Add(new ThumbnailFrameMetadata(frame.Timestamp, (int)x, (int)y, (int)width, (int)height));
@@ -89,7 +89,7 @@ namespace ThumbGen
                         var tsString = frame.GetTimestampString();
                         var fontSize = _renderingOptions.TimeCodeFontSize.Value;
 
-                        thumbnailEngine.DrawTimeCode(tsString, "Consolas", fontSize, originX, originY, _frameSize);
+                        canvas.DrawTimeCode(tsString, "Consolas", fontSize, originX, originY, _frameSize);
                     }
 
                     if (ct.IsCancellationRequested) 
@@ -113,10 +113,10 @@ namespace ThumbGen
                     _ => throw new NotImplementedException(),
                 };
 
-                thumbnailEngine.DrawWatermark(_renderingOptions.WatermarkFilename, watermarkX, watermarkY, watermarkWidth, watermarkHeight);
+                canvas.DrawWatermark(_renderingOptions.WatermarkFilename, watermarkX, watermarkY, watermarkWidth, watermarkHeight);
             }
 
-            var image = thumbnailEngine.Finish();
+            var image = canvas.Finish();
 
             return new ThumbnailRenderResult(image, frameMetadata);
         }

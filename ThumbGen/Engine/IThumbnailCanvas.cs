@@ -4,7 +4,7 @@ using ThumbGen.Builder;
 
 namespace ThumbGen.Engine
 {
-    public interface IThumbnailEngine
+    public interface IThumbnailCanvas
     {
         void DrawAspectOverlap(float x, float y, float width, float height);
         void DrawImage(VideoFrame videoFrame, float x, float y, float width, float height);

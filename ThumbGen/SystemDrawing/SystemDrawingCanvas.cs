@@ -6,7 +6,7 @@ using ThumbGen.Engine;
 namespace ThumbGen.SystemDrawing
 {
     [SupportedOSPlatform("windows")]
-    internal class SystemDrawingEngine : IThumbnailEngine
+    internal class SystemDrawingCanvas : IThumbnailCanvas
     {
         private readonly Bitmap _bitmap;
         private readonly Graphics _graphics;
@@ -15,7 +15,7 @@ namespace ThumbGen.SystemDrawing
         private readonly Brush _timeCodeBgBrush;
         private readonly Brush _timeCodeBrush;
 
-        public SystemDrawingEngine(Bitmap bitmap, Brush bgBrush, Brush aspectOverlapBrush, Brush timeCodeBgBrush, Brush timeCodeBrush)
+        public SystemDrawingCanvas(Bitmap bitmap, Brush bgBrush, Brush aspectOverlapBrush, Brush timeCodeBgBrush, Brush timeCodeBrush)
         {
             _bitmap = bitmap;
             _graphics = Graphics.FromImage(bitmap);

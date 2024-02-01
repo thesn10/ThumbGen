@@ -6,14 +6,14 @@ using ThumbGen.Options;
 
 namespace ThumbGen.Magick
 {
-    internal class MagickEngineFactory : IThumbnailEngineFactory
+    internal class MagickThumbnailRenderEngine : IThumbnailRenderEngine
     {
         private readonly MagickEngineColorOptions _colorOpts;
         private readonly MagickColor? _bgColor;
         private readonly MagickImage? _bgImage;
         private readonly Size _size;
 
-        public MagickEngineFactory(RenderingOptions opts, Size totalSize)
+        public MagickThumbnailRenderEngine(RenderingOptions opts, Size totalSize)
         {
             _size = totalSize;
             _colorOpts = new MagickEngineColorOptions()
@@ -30,11 +30,11 @@ namespace ThumbGen.Magick
             _bgImage = GetGradient(opts.BgGradient);
         }
 
-        public IThumbnailEngine CreateNew()
+        public IThumbnailCanvas CreateCanvas()
         {
             var image = _bgImage?.Clone() ?? new MagickImage(_bgColor ?? MagickColors.Black, _size.Width, _size.Height);
 
-            return new MagickEngine(image, _colorOpts);
+            return new MagickThumbnailCanvas(image, _colorOpts);
         }
 
         private MagickColor? GetColor(Color? color, Color? defaultColor = null)

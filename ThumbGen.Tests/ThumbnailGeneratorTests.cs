@@ -21,7 +21,7 @@ public class ThumbnailGeneratorTests
             .WithWebVTT("storyboard.vtt", (imagePath, index) => "/media/" + Path.GetFileName(imagePath));
 
         var renderingOpts = new RenderingOptions()
-            .WithFrameSize(192, 108)
+            .WithFrameSize(-1, 108)
             .WithTiling(options =>
             {
                 options.Columns = 4;
@@ -30,7 +30,6 @@ public class ThumbnailGeneratorTests
             .WithBorder(new Size(8, 8))
             .UseBackgroundGradient(
                 new LinearGradient(Color.Cyan, Color.Blue, 45))
-            .WithWatermark("./logo.svg", 605, 178, WatermarkPosition.Center)
             .WithTimeCode(14f)
             .UseTimeCodeBackgroundColor(Color.Black)
             .PreserveFrameAspect(false)

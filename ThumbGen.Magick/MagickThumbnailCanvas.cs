@@ -5,12 +5,12 @@ using ThumbGen.Engine;
 
 namespace ThumbGen.Magick
 {
-    internal class MagickEngine : IThumbnailEngine
+    internal class MagickThumbnailCanvas : IThumbnailCanvas
     {
         private readonly IMagickImage<byte> _image;
         private readonly MagickEngineColorOptions _colorOpts;
 
-        public MagickEngine(IMagickImage<byte> image, MagickEngineColorOptions colorOpts)
+        public MagickThumbnailCanvas(IMagickImage<byte> image, MagickEngineColorOptions colorOpts)
         {
             _image = image;
             _colorOpts = colorOpts;

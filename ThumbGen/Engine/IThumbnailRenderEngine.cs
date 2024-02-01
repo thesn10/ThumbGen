@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace ThumbGen.Engine
 {
-    public interface IThumbnailEngineFactory
+    public interface IThumbnailRenderEngine
     {
-        IThumbnailEngine CreateNew();
+        IThumbnailCanvas CreateCanvas();
     }
 }

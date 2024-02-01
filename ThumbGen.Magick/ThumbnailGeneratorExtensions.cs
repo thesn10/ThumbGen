@@ -9,7 +9,7 @@ namespace ThumbGen
         {
             var sizing = opts.CalcSizes2();
 
-            var engine = new MagickEngineFactory(opts, sizing.TotalSize);
+            var engine = new MagickThumbnailRenderEngine(opts, sizing.TotalSize);
             var renderer = new ThumbnailRenderer(opts, engine, sizing);
 
             builder.Renderer = renderer;

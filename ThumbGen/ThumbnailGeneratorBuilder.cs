@@ -28,7 +28,7 @@ namespace ThumbGen
         {
             var sizing = opts.CalcSizes2();
 
-            var engine = new SystemDrawingEngineFactory(opts, sizing.TotalSize);
+            var engine = new SystemDrawingRenderEngine(opts, sizing.TotalSize);
             var renderer = new ThumbnailRenderer(opts, engine, sizing);
 
             Renderer = renderer;

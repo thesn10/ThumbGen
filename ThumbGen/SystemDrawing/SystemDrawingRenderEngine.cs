@@ -8,7 +8,7 @@ using ThumbGen.Options;
 namespace ThumbGen.SystemDrawing
 {
     [SupportedOSPlatform("windows")]
-    internal class SystemDrawingEngineFactory : IThumbnailEngineFactory
+    internal class SystemDrawingRenderEngine : IThumbnailRenderEngine
     {
         private readonly Brush _bgBrush;
         private readonly Brush _aspectOverlapBrush;
@@ -16,7 +16,7 @@ namespace ThumbGen.SystemDrawing
         private readonly Brush _timeCodeBrush;
         private readonly Size _size;
 
-        public SystemDrawingEngineFactory(RenderingOptions opts, Size totalSize, bool tryEnableUnixSupport = false)
+        public SystemDrawingRenderEngine(RenderingOptions opts, Size totalSize, bool tryEnableUnixSupport = false)
         {
             if (tryEnableUnixSupport)
                 AppContext.SetSwitch("System.Drawing.EnableUnixSupport", true); // only works for net 6 or lower
@@ -28,10 +28,10 @@ namespace ThumbGen.SystemDrawing
             _timeCodeBrush = MapToBrush(opts.TimeCodeGradient, opts.TimeCodeColor, Color.White);
         }
 
-        public IThumbnailEngine CreateNew()
+        public IThumbnailCanvas CreateCanvas()
         {
             var bitmap = new Bitmap(_size.Width, _size.Height);
-            return new SystemDrawingEngine(bitmap, _bgBrush, _aspectOverlapBrush, _timeCodeBgBrush, _timeCodeBrush);
+            return new SystemDrawingCanvas(bitmap, _bgBrush, _aspectOverlapBrush, _timeCodeBgBrush, _timeCodeBrush);
         }
 
         private Brush MapToBrush(LinearGradient? gradient, Color? color, Color? defaultColor = null)
