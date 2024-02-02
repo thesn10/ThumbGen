@@ -23,5 +23,5 @@ jobs:
       run: dotnet build --configuration Release
     - name: Test
       env:
-        TG_FFMPEG_ROOT_PATH: ${{ setup-ffmpeg.outputs.path }}
+        TG_FFMPEG_ROOT_PATH: ${{ steps.setup-ffmpeg.outputs.path }}
       run: dotnet test --configuration Release --no-build
