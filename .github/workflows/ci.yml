@@ -17,7 +17,7 @@ jobs:
       with:
         dotnet-version: 8.0.x
     - name: Setup FFmpeg
-      uses: FedericoCarboni/setup-ffmpeg@v3
+      uses: FayazRahman/setup-ffmpeg@v1.1.0
     - name: Build
       run: dotnet build --configuration Release
     - name: Test
