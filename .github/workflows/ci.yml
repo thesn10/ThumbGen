@@ -22,7 +22,7 @@ jobs:
     - name: Print ffmpeg path
       env:
         TG_FFMPEG_ROOT_PATH: ${{ steps.setup-ffmpeg.outputs.path }}
-      run: echo %TG_FFMPEG_ROOT_PATH%
+      run: dir $env:TG_FFMPEG_ROOT_PATH
     - name: Build
       run: dotnet build --configuration Release
     - name: Test
