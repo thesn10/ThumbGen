@@ -18,7 +18,10 @@ jobs:
         dotnet-version: 8.0.x
     - name: Setup FFmpeg
       uses: FayazRahman/setup-ffmpeg@v1.1.0
+      id: setup-ffmpeg
     - name: Build
       run: dotnet build --configuration Release
     - name: Test
+      env:
+        TG_FFMPEG_ROOT_PATH: ${{ setup-ffmpeg.outputs.path }}
       run: dotnet test --configuration Release --no-build
