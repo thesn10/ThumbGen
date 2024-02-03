@@ -16,9 +16,11 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
-    - name: Setup FFmpeg
-      uses: FayazRahman/setup-ffmpeg@v1.1.0
+    - uses: thesn10/setup-ffmpeg@v0.1.0
       id: setup-ffmpeg
+      with:
+        ffmpeg-version: release
+        linking-type: shared
     - name: Print ffmpeg path
       env:
         TG_FFMPEG_ROOT_PATH: ${{ steps.setup-ffmpeg.outputs.path }}
