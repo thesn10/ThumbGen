@@ -23,11 +23,11 @@ jobs:
         linking-type: shared
     - name: Print ffmpeg path
       env:
-        TG_FFMPEG_ROOT_PATH: ${{ steps.setup-ffmpeg.outputs.path }}
+        TG_FFMPEG_ROOT_PATH: ${{ steps.setup-ffmpeg.outputs.ffmpeg-path }}
       run: dir $env:TG_FFMPEG_ROOT_PATH
     - name: Build
       run: dotnet build --configuration Release
     - name: Test
       env:
-        TG_FFMPEG_ROOT_PATH: ${{ steps.setup-ffmpeg.outputs.path }}
+        TG_FFMPEG_ROOT_PATH: ${{ steps.setup-ffmpeg.outputs.ffmpeg-path }}
       run: dotnet test --configuration Release --no-build
