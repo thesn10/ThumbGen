@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using ThumbGen.Options;
 
 namespace ThumbGen.FrameCapture;
 
@@ -104,7 +103,7 @@ public class VideoFrameCaptureManager
             if (frameTime > endTime)
                 break;
 
-            var (videoFrame, frameTs) = await Task.Run(() => _frameExtractor.GetAtTimestamp(frameTime));
+            var (videoFrame, frameTs) = await Task.Run(() => _frameExtractor.GetAtTimestamp(frameTime)).ConfigureAwait(false);
 
             if (videoFrame is null)
             {

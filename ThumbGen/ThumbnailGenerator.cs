@@ -32,25 +32,25 @@ public class ThumbnailGenerator
         var totalFrames = thumbGenOptions.TotalFrames ?? _renderer.FramesPerThumbnail;
         var allFrames = CaptureFramesAsync(thumbGenOptions, startTime, endTime, totalFrames, ct);
 
-        var webvttGenerator = await CreateWebVTTOrDefault(thumbGenOptions, ct);
+        var webvttGenerator = await CreateWebVTTOrDefault(thumbGenOptions, ct).ConfigureAwait(false);
 
         var thumbnailFileIndex = 0;
-        await foreach (var renderResult in _renderer.RenderMultipleAsync(allFrames, ct))
+        await foreach (var renderResult in _renderer.RenderMultipleAsync(allFrames, ct).ConfigureAwait(false))
         {
             if (ct.IsCancellationRequested) return;
 
             var imageFilePath = thumbGenOptions.GetFilePath(thumbnailFileIndex);
-            await renderResult.Image.SaveToFileAsync(imageFilePath);
+            await renderResult.Image.SaveToFileAsync(imageFilePath).ConfigureAwait(false);
 
             var imageUrl = thumbGenOptions.GetWebVTTImageUrl(imageFilePath, thumbnailFileIndex);
             if (webvttGenerator is not null)
-                await webvttGenerator.AddCuesAsync(imageUrl, renderResult.FrameMetadata, ct);
+                await webvttGenerator.AddCuesAsync(imageUrl, renderResult.FrameMetadata, ct).ConfigureAwait(false);
 
             thumbnailFileIndex++;
         }
 
         if (webvttGenerator is not null)
-            await webvttGenerator.FinishAsync();
+            await webvttGenerator.FinishAsync().ConfigureAwait(false);
     }
 
     private IAsyncEnumerable<Frame> CaptureFramesAsync(

@@ -130,7 +130,7 @@ namespace ThumbGen.Renderer
             IAsyncEnumerable<Frame> frames,
             [EnumeratorCancellation] CancellationToken ct = default)
         {
-            await foreach (var currentFrames in frames.Buffer(FramesPerThumbnail).WithCancellation(ct))
+            await foreach (var currentFrames in frames.Buffer(FramesPerThumbnail).WithCancellation(ct).ConfigureAwait(false))
             {
                 if (currentFrames.Count == 0) break;
                 if (ct.IsCancellationRequested) break;
@@ -138,7 +138,7 @@ namespace ThumbGen.Renderer
                 ThumbnailRenderResult renderResult;
                 try
                 {
-                    renderResult = await RenderAsync(currentFrames.AsReadOnly(), ct);
+                    renderResult = await RenderAsync(currentFrames.AsReadOnly(), ct).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {

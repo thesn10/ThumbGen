@@ -59,7 +59,7 @@ namespace ThumbGen
             // A blank line, which is equivalent to two consecutive newlines.
             output.Write("\n\n"u8);
 
-            await output.FlushAsync(ct);
+            await output.FlushAsync(ct).ConfigureAwait(false);
 
             return new WebVTTGenerator(output, duration);
         }
@@ -79,7 +79,7 @@ namespace ThumbGen
                 if (_pendingCue is not null)
                 {
                     var (pendingCueImageUrl, pendingCueFrame) = _pendingCue.Value;
-                    var pendingCueResult = await AddCueAsync(pendingCueImageUrl, pendingCueFrame, frame.Timestamp, ct);
+                    var pendingCueResult = await AddCueAsync(pendingCueImageUrl, pendingCueFrame, frame.Timestamp, ct).ConfigureAwait(false);
                     _pendingCue = null;
 
                     if (pendingCueResult.IsCanceled || pendingCueResult.IsCompleted)
@@ -95,7 +95,7 @@ namespace ThumbGen
                     break;
                 }
 
-                var result = await AddCueAsync(imageUrl, frame, endTimestamp.Value, ct);
+                var result = await AddCueAsync(imageUrl, frame, endTimestamp.Value, ct).ConfigureAwait(false);
 
                 if (result.IsCanceled || result.IsCompleted)
                 {
@@ -116,7 +116,7 @@ namespace ThumbGen
                     """;
             Encoding.UTF8.GetBytes(webvttSection.AsSpan(), _output);
 
-            var result = await _output.FlushAsync(ct);
+            var result = await _output.FlushAsync(ct).ConfigureAwait(false);
             return result;
         }
 
@@ -125,12 +125,12 @@ namespace ThumbGen
             if (_pendingCue is not null)
             {
                 var (pendingCueImageUrl, pendingCueFrame) = _pendingCue.Value;
-                await AddCueAsync(pendingCueImageUrl, pendingCueFrame, _duration);
+                await AddCueAsync(pendingCueImageUrl, pendingCueFrame, _duration).ConfigureAwait(false);
 
                 _pendingCue = null;
             }
 
-            await _output.CompleteAsync();
+            await _output.CompleteAsync().ConfigureAwait(false);
         }
     }
 }
