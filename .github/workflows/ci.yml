@@ -7,12 +7,27 @@ on:
     - master
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     timeout-minutes: 15
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - uses: thesn10/setup-ffmpeg@v0.1.0
+      id: setup-ffmpeg
+      with:
+        ffmpeg-version: release
+        linking-type: shared
+    - name: Print ffmpeg path
+      env:
+        TG_FFMPEG_ROOT_PATH: ${{ steps.setup-ffmpeg.outputs.ffmpeg-path }}
+      run: dir $env:TG_FFMPEG_ROOT_PATH
     - name: Build
       run: dotnet build --configuration Release
     - name: Test
+      env:
+        TG_FFMPEG_ROOT_PATH: ${{ steps.setup-ffmpeg.outputs.ffmpeg-path }}
       run: dotnet test --configuration Release --no-build
