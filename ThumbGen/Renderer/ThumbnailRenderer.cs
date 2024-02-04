@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -138,7 +139,11 @@ namespace ThumbGen.Renderer
                 ThumbnailRenderResult renderResult;
                 try
                 {
+#if NET8_0
                     renderResult = await RenderAsync(currentFrames.AsReadOnly(), ct).ConfigureAwait(false);
+#else
+                    renderResult = await RenderAsync(new ReadOnlyCollection<Frame>(currentFrames), ct).ConfigureAwait(false);
+#endif
                 }
                 catch (OperationCanceledException)
                 {

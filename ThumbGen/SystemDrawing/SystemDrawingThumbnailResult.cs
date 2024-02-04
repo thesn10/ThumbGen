@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace ThumbGen.SystemDrawing
 {
+#if NET5_0_OR_GREATER
     [SupportedOSPlatform("windows")]
+#endif
     internal class SystemDrawingThumbnailResult : IThumbnailImage
     {
         private readonly Bitmap _bitmap;

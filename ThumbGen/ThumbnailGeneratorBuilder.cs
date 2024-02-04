@@ -29,8 +29,9 @@ namespace ThumbGen
 
             return this;
         }
-
+#if NET5_0_OR_GREATER
         [SupportedOSPlatform("windows")]
+#endif
         public ThumbnailGeneratorBuilder UseSystemDrawingRenderer()
         {
             RendererFactory = (opts, videoSize) =>
@@ -61,8 +62,15 @@ namespace ThumbGen
 
         public ThumbnailGenerator Build(string inputFilePath)
         {
+#if NET7_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(FrameCaptureManagerFactory);
             ArgumentNullException.ThrowIfNull(RendererFactory);
+#else
+            if (FrameCaptureManagerFactory is null) 
+                throw new ArgumentNullException(nameof(FrameCaptureManagerFactory));
+            if (RendererFactory is null)
+                throw new ArgumentNullException(nameof(RendererFactory));
+#endif
 
             var frameCaptureManager = FrameCaptureManagerFactory(inputFilePath);
             var videoSize = new Size(frameCaptureManager.Width, frameCaptureManager.Height);

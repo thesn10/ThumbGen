@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipelines;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,7 +54,7 @@ namespace ThumbGen
             {
                 // There must be at least one space after WEBVTT.
                 output.Write(" "u8);
-                Encoding.UTF8.GetBytes(textHeader.AsSpan(), output);
+                WriteToOutput(output, textHeader.AsSpan());
             }
 
             // A blank line, which is equivalent to two consecutive newlines.
@@ -114,7 +115,7 @@ namespace ThumbGen
                     {imageUrl}#xywh={frame.X},{frame.Y},{frame.Width},{frame.Height}
 
                     """;
-            Encoding.UTF8.GetBytes(webvttSection.AsSpan(), _output);
+            WriteToOutput(_output, webvttSection.AsSpan());
 
             var result = await _output.FlushAsync(ct).ConfigureAwait(false);
             return result;
@@ -131,6 +132,21 @@ namespace ThumbGen
             }
 
             await _output.CompleteAsync().ConfigureAwait(false);
+        }
+
+        private static long WriteToOutput(PipeWriter output, ReadOnlySpan<char> chars)
+        {
+#if NET5_0_OR_GREATER
+            return Encoding.UTF8.GetBytes(chars, output);
+#else
+            int byteCount = Encoding.UTF8.GetByteCount(chars);
+            Span<byte> scratchBuffer = output.GetSpan(byteCount);
+
+            int actualBytesWritten = Encoding.UTF8.GetBytes(chars, scratchBuffer);
+
+            output.Advance(actualBytesWritten);
+            return actualBytesWritten;
+#endif
         }
     }
 }

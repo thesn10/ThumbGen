@@ -5,7 +5,9 @@ using ThumbGen.Engine;
 
 namespace ThumbGen.SystemDrawing
 {
+#if NET5_0_OR_GREATER
     [SupportedOSPlatform("windows")]
+#endif
     internal class SystemDrawingCanvas : IThumbnailCanvas
     {
         private readonly Bitmap _bitmap;
