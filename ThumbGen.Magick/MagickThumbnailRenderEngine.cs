@@ -6,7 +6,7 @@ using ThumbGen.Options;
 
 namespace ThumbGen.Magick
 {
-    internal class MagickThumbnailRenderEngine : IThumbnailRenderEngine
+    public class MagickThumbnailRenderEngine : IThumbnailRenderEngine
     {
         private readonly MagickEngineColorOptions _colorOpts;
         private readonly MagickColor? _bgColor;

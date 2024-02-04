@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ThumbGen.Builder;
@@ -24,7 +25,14 @@ public class ThumbnailGenerator
         _renderer = renderer;
     }
 
-    public async Task ExecuteAsync(ThumbGenOptions thumbGenOptions, CancellationToken ct = default)
+    public ValueTask<List<ThumbnailRenderResult>> ExecuteAsync(ThumbGenOptions thumbGenOptions, CancellationToken ct = default)
+    {
+        return ExecuteCoreAsync(thumbGenOptions, ct).ToListAsync(ct);
+    }
+
+    public async IAsyncEnumerable<ThumbnailRenderResult> ExecuteCoreAsync(
+        ThumbGenOptions thumbGenOptions, 
+        [EnumeratorCancellation] CancellationToken ct = default)
     {
         var startTime = thumbGenOptions.StartTime ?? thumbGenOptions.StartTimePercent * _frameCapture.Duration;
         var endTime = thumbGenOptions.EndTime ?? thumbGenOptions.EndTimePercent * _frameCapture.Duration;
@@ -37,7 +45,8 @@ public class ThumbnailGenerator
         var thumbnailFileIndex = 0;
         await foreach (var renderResult in _renderer.RenderMultipleAsync(allFrames, ct).ConfigureAwait(false))
         {
-            if (ct.IsCancellationRequested) return;
+            yield return renderResult;
+            if (ct.IsCancellationRequested) yield break;
 
             var imageFilePath = thumbGenOptions.GetFilePath(thumbnailFileIndex);
             await renderResult.Image.SaveToFileAsync(imageFilePath).ConfigureAwait(false);

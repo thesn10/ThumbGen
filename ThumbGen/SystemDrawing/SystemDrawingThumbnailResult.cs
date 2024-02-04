@@ -11,21 +11,21 @@ namespace ThumbGen.SystemDrawing
 #endif
     internal class SystemDrawingThumbnailResult : IThumbnailImage
     {
-        private readonly Bitmap _bitmap;
+        public Bitmap Bitmap { get; init; }
 
         public SystemDrawingThumbnailResult(Bitmap bitmap)
         {
-            _bitmap = bitmap;
+            Bitmap = bitmap;
         }
 
         public void SaveToFile(string filePath)
         {
-            _bitmap.Save(filePath);
+            Bitmap.Save(filePath);
         }
 
         public Task SaveToFileAsync(string filePath)
         {
-            return Task.Run(() => _bitmap.Save(filePath));
+            return Task.Run(() => Bitmap.Save(filePath));
         }
     }
 }

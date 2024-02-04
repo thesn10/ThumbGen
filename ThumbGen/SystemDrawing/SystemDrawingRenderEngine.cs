@@ -10,7 +10,7 @@ namespace ThumbGen.SystemDrawing
 #if NET5_0_OR_GREATER
     [SupportedOSPlatform("windows")]
 #endif
-    internal class SystemDrawingRenderEngine : IThumbnailRenderEngine
+    public class SystemDrawingRenderEngine : IThumbnailRenderEngine
     {
         private readonly Brush _bgBrush;
         private readonly Brush _aspectOverlapBrush;
