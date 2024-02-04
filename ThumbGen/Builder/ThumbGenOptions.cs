@@ -12,18 +12,17 @@ namespace ThumbGen.Builder
 
     public class ThumbGenOptions
     {
-        internal Func<int, string> GetFilePath { get; set; } = (index) => FilePathWithIndex(index, "thumbnail.jpg");
-        internal Func<string, int, string> GetWebVTTImageUrl { get; set; } = (imagePath, index) => Path.GetFileName(imagePath);
-        internal string WebVTTFilename { get; set; } = "storyboard.vtt";
-        internal bool GenerateWebVTT { get; set; } = false;
-
-        internal int? TotalFrames { get; set; }
-        internal TimeSpan? Interval { get; set; }
-        internal TimeSpan? StartTime { get; set; }
-        internal TimeSpan? EndTime { get; set; }
-        internal bool FastMode { get; private set; }
-        internal double? EndTimePercent { get; private set; }
-        internal double? StartTimePercent { get; private set; }
+        public Func<int, string> GetFilePath { get; set; } = (index) => FilePathWithIndex(index, "thumbnail.jpg");
+        public Func<string, int, string> GetWebVTTImageUrl { get; set; } = (imagePath, index) => Path.GetFileName(imagePath);
+        public string WebVTTFilename { get; set; } = "storyboard.vtt";
+        public bool GenerateWebVTT { get; set; } = false;
+        public int? TotalFrames { get; set; }
+        public TimeSpan? Interval { get; set; }
+        public TimeSpan? StartTime { get; set; }
+        public TimeSpan? EndTime { get; set; }
+        public bool FastMode { get; set; }
+        public double? EndTimePercent { get; set; }
+        public double? StartTimePercent { get; set; }
 
         public ThumbGenOptions WithOutputFilename(string filepath)
         {
