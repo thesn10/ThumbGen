@@ -37,6 +37,9 @@ public class ThumbnailGeneratorTests
             .UseAspectOverlapColor(Color.Black)
             .UseTimeCodeColor(Color.White);
 
+        if (!OperatingSystem.IsWindows())
+            throw new PlatformNotSupportedException();
+
         var thumbnailGenerator = ThumbnailGeneratorBuilder
             .Create()
             .WithFFmpegVideoCapture()

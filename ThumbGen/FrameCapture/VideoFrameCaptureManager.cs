@@ -118,11 +118,8 @@ public class VideoFrameCaptureManager
         [NotNull] ref TimeSpan? startTime,
         [NotNull] ref TimeSpan? endTime)
     {
-        if (startTime is null)
-            startTime = TimeSpan.Zero;
-
-        if (endTime is null)
-            endTime = _frameExtractor.Duration;
+        startTime ??= TimeSpan.Zero;
+        endTime ??= _frameExtractor.Duration;
 
         if (endTime > _frameExtractor.Duration)
         {

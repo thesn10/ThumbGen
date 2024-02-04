@@ -86,7 +86,7 @@ namespace ThumbGen.Magick
             return new MagickThumbnailResult(_image);
         }
 
-        private IDrawables<byte> DrawBgImageOrColor(IMagickImage<byte> image, MagickImage? bgImage, MagickColor? color, MagickColor? defaultColor = null)
+        private static IDrawables<byte> DrawBgImageOrColor(IMagickImage<byte> image, MagickImage? bgImage, MagickColor? color, MagickColor? defaultColor = null)
         {
             if (bgImage is not null)
             {

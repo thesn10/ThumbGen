@@ -37,7 +37,7 @@ namespace ThumbGen.Magick
             return new MagickThumbnailCanvas(image, _colorOpts);
         }
 
-        private MagickColor? GetColor(Color? color, Color? defaultColor = null)
+        private static MagickColor? GetColor(Color? color, Color? defaultColor = null)
         {
             if (color is null)
             {

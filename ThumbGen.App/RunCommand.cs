@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Threading.Tasks;
 using ThumbGen.Builder;
 using ThumbGen.Options;
@@ -30,10 +31,16 @@ namespace ThumbGen.App
                 renderingOpts.UseBackgroundGradient(
                     new LinearGradient(Color.FromName(options.BackgroundGradientStart), Color.FromName(options.BackgroundGradientEnd), 45));
 
-            var thumbnailGenerator = ThumbnailGeneratorBuilder
+            var builder = ThumbnailGeneratorBuilder
                 .Create()
-                .WithFFmpegVideoCapture()
-                .UseSystemDrawingRenderer()
+                .WithFFmpegVideoCapture();
+
+            if (OperatingSystem.IsWindows())
+                builder.UseSystemDrawingRenderer();
+            else
+                builder.UseMagickRenderer();
+
+            var thumbnailGenerator = builder
                 .ConfigureRendering(renderingOpts)
                 .Build("video.webm");
 

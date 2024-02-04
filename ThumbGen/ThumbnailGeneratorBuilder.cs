@@ -11,12 +11,12 @@ namespace ThumbGen
 {
     public class ThumbnailGeneratorBuilder
     {
-        private RenderingOptions _renderingOptions = new RenderingOptions();
+        private RenderingOptions _renderingOptions = new();
 
         public Func<string, VideoFrameCaptureManager>? FrameCaptureManagerFactory { get; set; }
         public Func<RenderingOptions, Size, ThumbnailRenderer>? RendererFactory { get; set; }
 
-        public static ThumbnailGeneratorBuilder Create() => new ThumbnailGeneratorBuilder();
+        public static ThumbnailGeneratorBuilder Create() => new();
 
         public ThumbnailGeneratorBuilder WithFFmpegVideoCapture()
         {
@@ -66,10 +66,14 @@ namespace ThumbGen
             ArgumentNullException.ThrowIfNull(FrameCaptureManagerFactory);
             ArgumentNullException.ThrowIfNull(RendererFactory);
 #else
+#pragma warning disable IDE0079
+#pragma warning disable CA2208
             if (FrameCaptureManagerFactory is null) 
                 throw new ArgumentNullException(nameof(FrameCaptureManagerFactory));
             if (RendererFactory is null)
                 throw new ArgumentNullException(nameof(RendererFactory));
+#pragma warning restore CA2208
+#pragma warning restore IDE0079
 #endif
 
             var frameCaptureManager = FrameCaptureManagerFactory(inputFilePath);

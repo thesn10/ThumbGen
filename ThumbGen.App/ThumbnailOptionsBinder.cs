@@ -5,7 +5,7 @@ namespace ThumbGen.App;
 public class ThumbnailOptionsBinder : BinderBase<ThumbnailOptions>
 {
     protected override ThumbnailOptions GetBoundValue(BindingContext bindingContext) =>
-        new ThumbnailOptions
+        new()
         {
             StartTime = bindingContext.ParseResult.GetValueForOption(CommandLineOptions.StartTimeOption),
             Interval = bindingContext.ParseResult.GetValueForOption(CommandLineOptions.IntervalOption),

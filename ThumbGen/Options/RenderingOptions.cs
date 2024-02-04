@@ -110,7 +110,7 @@ namespace ThumbGen.Options
 
         public RenderingOptions UseAspectOverlap(bool aspectOverlap = true)
         {
-            AspectOverlap = true;
+            AspectOverlap = aspectOverlap;
             return this;
         }
 

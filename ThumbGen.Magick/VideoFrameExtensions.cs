@@ -39,8 +39,8 @@ namespace ThumbGen.Magick
                 return BgraToMagickImage(frame);
             }
 
-            using VideoFrame dstFrame = new VideoFrame(frame.AVFrame.width, frame.AVFrame.height, AVPixelFormat.AV_PIX_FMT_BGRA);
-            using PixelConverter pixelConverter = new PixelConverter(dstFrame);
+            using var dstFrame = new VideoFrame(frame.AVFrame.width, frame.AVFrame.height, AVPixelFormat.AV_PIX_FMT_BGRA);
+            using var pixelConverter = new PixelConverter(dstFrame);
             return BgraToMagickImage(pixelConverter.ConvertFrame(frame));
         }
     }

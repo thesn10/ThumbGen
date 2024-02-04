@@ -93,8 +93,7 @@ namespace ThumbGen.Renderer
                         canvas.DrawTimeCode(tsString, "Consolas", fontSize, originX, originY, _frameSize);
                     }
 
-                    if (ct.IsCancellationRequested)
-                        throw new OperationCanceledException();
+                    ct.ThrowIfCancellationRequested();
                 }
             }
 
