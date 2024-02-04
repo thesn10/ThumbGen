@@ -39,7 +39,11 @@ jobs:
       run: dotnet test --configuration Release /p:Version=${{ github.event.release.tag_name }} --no-build
     - name: Pack
       run: dotnet pack --configuration Release /p:Version=${{ github.event.release.tag_name }} --no-build --output .
-    - name: Push
+    - name: Push ThumbGen to Github
       run: dotnet nuget push ThumbGen.${{ github.event.release.tag_name }}.nupkg --source https://nuget.pkg.github.com/thesn10/index.json --api-key ${{ secrets.GITHUB_TOKEN }}
-    - name: Push
+    - name: Push ThumbGen.Magick to Github
       run: dotnet nuget push ThumbGen.Magick.${{ github.event.release.tag_name }}.nupkg --source https://nuget.pkg.github.com/thesn10/index.json --api-key ${{ secrets.GITHUB_TOKEN }}
+    - name: Push ThumbGen to Nuget
+      run: dotnet nuget push ThumbGen.${{ github.event.release.tag_name }}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+    - name: Push ThumbGen.Magick to Nuget
+      run: dotnet nuget push ThumbGen.Magick.${{ github.event.release.tag_name }}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
