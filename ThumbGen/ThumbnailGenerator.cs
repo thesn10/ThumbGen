@@ -48,8 +48,11 @@ public class ThumbnailGenerator
             yield return renderResult;
             if (ct.IsCancellationRequested) yield break;
 
-            var imageFilePath = thumbGenOptions.GetFilePath(thumbnailFileIndex);
-            await renderResult.Image.SaveToFileAsync(imageFilePath).ConfigureAwait(false);
+            var imageFilePath = thumbGenOptions.GetFilePath?.Invoke(thumbnailFileIndex) ?? null;
+            if (imageFilePath is not null)
+            {
+                await renderResult.Image.SaveToFileAsync(imageFilePath).ConfigureAwait(false);
+            }
 
             var imageUrl = thumbGenOptions.GetWebVTTImageUrl(imageFilePath, thumbnailFileIndex);
             if (webvttGenerator is not null)

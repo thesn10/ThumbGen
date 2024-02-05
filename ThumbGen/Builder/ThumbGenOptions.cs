@@ -13,7 +13,7 @@ namespace ThumbGen.Builder
     public class ThumbGenOptions
     {
         public Func<int, string> GetFilePath { get; set; } = (index) => FilePathWithIndex(index, "thumbnail.jpg");
-        public Func<string, int, string> GetWebVTTImageUrl { get; set; } = (imagePath, index) => Path.GetFileName(imagePath);
+        public Func<string?, int, string> GetWebVTTImageUrl { get; set; } = (imagePath, index) => Path.GetFileName(imagePath) ?? string.Empty;
         public string WebVTTFilename { get; set; } = "storyboard.vtt";
         public bool GenerateWebVTT { get; set; } = false;
         public int? TotalFrames { get; set; }
