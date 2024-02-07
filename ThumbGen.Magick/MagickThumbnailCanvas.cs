@@ -19,7 +19,7 @@ namespace ThumbGen.Magick
         public void DrawAspectOverlap(float x, float y, float width, float height)
         {
             DrawBgImageOrColor(_image, _colorOpts.AspectOverlapImage, _colorOpts.AspectOverlapColor)
-                .Rectangle(x, y, width, height)
+                .Rectangle(x, y, x + width, y + height)
                 .Draw(_image);
         }
 
