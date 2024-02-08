@@ -1,6 +1,6 @@
 ﻿using ThumbGen.Magick;
-using ThumbGen.Options;
 using ThumbGen.Renderer;
+using Microsoft.Extensions.Logging;
 
 namespace ThumbGen
 {
@@ -11,9 +11,10 @@ namespace ThumbGen
             builder.RendererFactory = (opts, videoSize) =>
             {
                 var sizing = opts.CalcSizes2(videoSize.Width, videoSize.Height);
+                var logger = builder.LoggerFactory?.CreateLogger(typeof(ThumbnailRenderer));
 
                 var engine = new MagickThumbnailRenderEngine(opts, sizing.TotalSize);
-                var renderer = new ThumbnailRenderer(opts, engine, sizing);
+                var renderer = new ThumbnailRenderer(opts, engine, sizing, logger);
                 return renderer;
             };
 

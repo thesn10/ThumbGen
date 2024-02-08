@@ -34,7 +34,7 @@ class Program
 
         var thumbnailOptionsBinder = new ThumbnailOptionsBinder();
 
-        rootCommand.SetHandler(RunCommand.Run, thumbnailOptionsBinder);
+        rootCommand.SetHandler(RunCommand.Run, thumbnailOptionsBinder, new LoggerFactoryBinder());
 
         return await rootCommand.InvokeAsync(args);
     }

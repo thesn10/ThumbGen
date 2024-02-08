@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Drawing;
 using System.Threading.Tasks;
 using ThumbGen.Builder;
@@ -8,7 +9,7 @@ namespace ThumbGen.App
 {
     internal static class RunCommand
     {
-        internal static async Task<int> Run(ThumbnailOptions options)
+        internal static async Task<int> Run(ThumbnailOptions options, ILoggerFactory loggerFactory)
         {
             var opts = new ThumbGenOptions()
                 .WithStartTime(options.StartTime)
@@ -33,7 +34,8 @@ namespace ThumbGen.App
 
             var builder = ThumbnailGeneratorBuilder
                 .Create()
-                .WithFFmpegVideoCapture();
+                .WithFFmpegVideoCapture()
+                .WithLogging(loggerFactory);
 
             if (OperatingSystem.IsWindows())
                 builder.UseSystemDrawingRenderer();

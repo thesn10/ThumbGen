@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -17,7 +19,7 @@ namespace ThumbGen.Renderer
     {
         private readonly RenderingOptions _renderingOptions;
         private readonly IThumbnailRenderEngine _thumbnailRenderEngine;
-
+        private readonly ILogger? _logger;
         private readonly Size _totalSize;
         private readonly SizeF _frameSize;
         private readonly SizeF _borderSize;
@@ -25,10 +27,12 @@ namespace ThumbGen.Renderer
         internal ThumbnailRenderer(
             RenderingOptions thumbGenOptions,
             IThumbnailRenderEngine thumbnailEngine,
-            ThumbnailSizing sizing)
+            ThumbnailSizing sizing,
+            ILogger? logger = null)
         {
             _renderingOptions = thumbGenOptions;
             _thumbnailRenderEngine = thumbnailEngine;
+            _logger = logger;
             (_totalSize, _frameSize, _borderSize) = sizing;
         }
 
@@ -36,6 +40,9 @@ namespace ThumbGen.Renderer
 
         public ThumbnailRenderResult Render(IReadOnlyList<Frame> frames, CancellationToken ct = default)
         {
+            _logger?.LogDebug("Rendering thumbnail using {frameCount} frames", frames.Count);
+            var sw = Stopwatch.StartNew();
+
             var canvas = _thumbnailRenderEngine.CreateCanvas();
             var frameMetadata = new List<ThumbnailFrameMetadata>();
 
@@ -117,6 +124,9 @@ namespace ThumbGen.Renderer
             }
 
             var image = canvas.Finish();
+
+            sw.Stop();
+            _logger?.LogInformation("Rendering completed in {renderTime}", sw.Elapsed);
 
             return new ThumbnailRenderResult(image, frameMetadata);
         }

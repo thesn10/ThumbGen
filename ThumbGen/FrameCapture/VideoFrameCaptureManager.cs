@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -10,15 +12,18 @@ namespace ThumbGen.FrameCapture;
 public class VideoFrameCaptureManager
 {
     private readonly VideoFrameExtractor _frameExtractor;
+    private readonly ILogger? _logger;
 
     public TimeSpan Duration => _frameExtractor.Duration;
     public int Width => _frameExtractor.Width;
     public int Height => _frameExtractor.Height;
 
     public VideoFrameCaptureManager(
-        VideoFrameExtractor frameExtractor)
+        VideoFrameExtractor frameExtractor,
+        ILogger? logger = null)
     {
         _frameExtractor = frameExtractor;
+        _logger = logger;
     }
 
     public IReadOnlyList<Frame> PerformFrameCapture(
@@ -103,7 +108,12 @@ public class VideoFrameCaptureManager
             if (frameTime > endTime)
                 break;
 
+            var sw = Stopwatch.StartNew();
+
             var (videoFrame, frameTs) = await Task.Run(() => _frameExtractor.GetAtTimestamp(frameTime)).ConfigureAwait(false);
+
+            sw.Stop();
+            _logger?.LogDebug("Captured video frame {frameNr} at {frameTs} in {elapsed}", frameNr, frameTs, sw.Elapsed);
 
             if (videoFrame is null)
             {
