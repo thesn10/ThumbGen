@@ -91,7 +91,7 @@ namespace ThumbGen.Renderer
                     canvas.DrawImage(frame.VideoFrame, x, y, width, height);
                     frame.VideoFrame.Dispose();
 
-                    frameMetadata.Add(new ThumbnailFrameMetadata(frame.Timestamp, (int)x, (int)y, (int)width, (int)height));
+                    frameMetadata.Add(new ThumbnailFrameMetadata(frame.Timestamp, (int)originX, (int)originY, (int)width, (int)height));
 
                     if (_renderingOptions.TimeCodeFontSize is not null)
                     {
