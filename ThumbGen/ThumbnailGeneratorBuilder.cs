@@ -20,7 +20,7 @@ namespace ThumbGen
 
         public static ThumbnailGeneratorBuilder Create() => new();
 
-        public ThumbnailGeneratorBuilder WithLogging(ILoggerFactory loggerFactory)
+        public ThumbnailGeneratorBuilder WithLogging(ILoggerFactory? loggerFactory)
         {
             LoggerFactory = loggerFactory;
 
