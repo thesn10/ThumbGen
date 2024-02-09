@@ -30,9 +30,9 @@ namespace ThumbGen.SystemDrawing
             _timeCodeBrush = MapToBrush(opts.TimeCodeGradient, opts.TimeCodeColor, Color.White);
         }
 
-        public IThumbnailCanvas CreateCanvas()
+        public IThumbnailCanvas CreateCanvas(int width, int height)
         {
-            var bitmap = new Bitmap(_size.Width, _size.Height);
+            var bitmap = new Bitmap(width, height);
             return new SystemDrawingCanvas(bitmap, _bgBrush, _aspectOverlapBrush, _timeCodeBgBrush, _timeCodeBrush);
         }
 

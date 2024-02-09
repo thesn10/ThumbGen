@@ -9,6 +9,6 @@ namespace ThumbGen.Engine
 {
     public interface IThumbnailRenderEngine
     {
-        IThumbnailCanvas CreateCanvas();
+        IThumbnailCanvas CreateCanvas(int width, int height);
     }
 }

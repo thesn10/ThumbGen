@@ -43,7 +43,8 @@ namespace ThumbGen.Renderer
             _logger?.LogDebug("Rendering thumbnail using {frameCount} frames", frames.Count);
             var sw = Stopwatch.StartNew();
 
-            var canvas = _thumbnailRenderEngine.CreateCanvas();
+            var totalSize = CalculateTotalSize(frames.Count);
+            var canvas = _thumbnailRenderEngine.CreateCanvas(totalSize.Width, totalSize.Height);
             var frameMetadata = new List<ThumbnailFrameMetadata>();
 
             for (var row = 0; row < _renderingOptions.TilingOptions.Rows; row++)
@@ -112,11 +113,11 @@ namespace ThumbGen.Renderer
                 var watermarkHeight = _renderingOptions.WatermarkSize.Value.Height;
                 var (watermarkX, watermarkY) = _renderingOptions.WatermarkPosition.Value switch
                 {
-                    WatermarkPosition.Center => ((_totalSize.Width - watermarkWidth) / 2, (_totalSize.Height - watermarkHeight) / 2),
+                    WatermarkPosition.Center => ((totalSize.Width - watermarkWidth) / 2, (totalSize.Height - watermarkHeight) / 2),
                     WatermarkPosition.TopLeft => (0, 0),
-                    WatermarkPosition.TopRight => (_totalSize.Width - watermarkWidth, 0),
-                    WatermarkPosition.BottomLeft => (0, _totalSize.Height - watermarkHeight),
-                    WatermarkPosition.BottomRight => (_totalSize.Width - watermarkWidth, _totalSize.Height - watermarkHeight),
+                    WatermarkPosition.TopRight => (totalSize.Width - watermarkWidth, 0),
+                    WatermarkPosition.BottomLeft => (0, totalSize.Height - watermarkHeight),
+                    WatermarkPosition.BottomRight => (totalSize.Width - watermarkWidth, totalSize.Height - watermarkHeight),
                     _ => throw new NotImplementedException(),
                 };
 
@@ -129,6 +130,23 @@ namespace ThumbGen.Renderer
             _logger?.LogInformation("Rendering completed in {renderTime}", sw.Elapsed);
 
             return new ThumbnailRenderResult(image, frameMetadata);
+        }
+
+        private Size CalculateTotalSize(int framesCount)
+        {
+            if (framesCount >= FramesPerThumbnail)
+            {
+                return _totalSize;
+            }
+
+            var rows = Math.Ceiling(framesCount / (float)_renderingOptions.TilingOptions.Columns);
+            var columns = Math.Min(framesCount, _renderingOptions.TilingOptions.Columns);
+
+            var totalBorderWidth = (columns + 1) * _renderingOptions.BorderSize.Width;
+            var totalBorderHeight = (rows + 1) * _renderingOptions.BorderSize.Height;
+            var totalSizeWidth = (int)(columns * _frameSize.Width + totalBorderWidth);
+            var totalSizeHeight = (int)(rows * _frameSize.Height + totalBorderHeight);
+            return new Size(totalSizeWidth, totalSizeHeight);
         }
 
         public Task<ThumbnailRenderResult> RenderAsync(IReadOnlyList<Frame> frames, CancellationToken ct = default)

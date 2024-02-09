@@ -30,11 +30,19 @@ namespace ThumbGen.Magick
             _bgImage = GetGradient(opts.BgGradient);
         }
 
-        public IThumbnailCanvas CreateCanvas()
+        public IThumbnailCanvas CreateCanvas(int width, int height)
         {
-            var image = _bgImage?.Clone() ?? new MagickImage(_bgColor ?? MagickColors.Black, _size.Width, _size.Height);
-
-            return new MagickThumbnailCanvas(image, _colorOpts);
+            if (_bgImage is not null)
+            {
+                var image = _bgImage.Clone();
+                image.Crop(width, height);
+                return new MagickThumbnailCanvas(image, _colorOpts);
+            }
+            else
+            {
+                var image = new MagickImage(_bgColor ?? MagickColors.Black, width, height);
+                return new MagickThumbnailCanvas(image, _colorOpts);
+            }
         }
 
         private static MagickColor? GetColor(Color? color, Color? defaultColor = null)

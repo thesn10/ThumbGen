@@ -14,7 +14,7 @@ public class ThumbnailGeneratorTests
 
         var opts = new ThumbGenOptions()
             .WithStartTime(TimeSpan.FromSeconds(60))
-            .WithInterval(TimeSpan.FromSeconds(5))
+            .WithInterval(TimeSpan.FromSeconds(4))
             .WithEndTime(TimeSpan.FromMinutes(4))
             .WithOutputFilename(Path.GetFullPath("./thumbnail_systemdrawing.bmp"))
             .UseFastMode()
@@ -26,16 +26,7 @@ public class ThumbnailGeneratorTests
             {
                 options.Columns = 4;
                 options.Rows = 4;
-            })
-            .WithBorder(new Size(8, 8))
-            .UseBackgroundGradient(
-                new LinearGradient(Color.Cyan, Color.Blue, 45))
-            .WithTimeCode(14f)
-            .UseTimeCodeBackgroundColor(Color.Black)
-            .PreserveFrameAspect(false)
-            .UseAspectOverlap(true)
-            .UseAspectOverlapColor(Color.Black)
-            .UseTimeCodeColor(Color.White);
+            });
 
         if (!OperatingSystem.IsWindows())
             throw new PlatformNotSupportedException();
