@@ -10,6 +10,8 @@
 	<PackageTags>thumbnail, thumbnails, thumbnail generator, thumbnailer, video thumbnail, media thumbailer, storyboard, webvtt</PackageTags>
 	<Description>Customizable cross-platform blazing-fast video thumbnail generator with many options for .NET 8</Description>
 	<LangVersion>latest</LangVersion>
+	<IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
