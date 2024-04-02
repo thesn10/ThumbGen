@@ -46,8 +46,17 @@ public class VideoFrameCaptureManager
     {
         EnsureTimeSpansNotNull(ref startTime, ref endTime);
 
+        using var activity = Diagnostics.ActivitySource?.StartActivity("PerformFrameCapture");
+
+        activity?.SetTag(Diagnostics.Constants.FrameCaptureStartTime, interval);
+        activity?.SetTag(Diagnostics.Constants.FrameCaptureEndTime, startTime);
+        activity?.SetTag(Diagnostics.Constants.FrameCaptureEndTime, endTime);
+
         var totalFrames = (int)Math.Floor((endTime.Value - startTime.Value) / interval);
         maxFrames = maxFrames.HasValue ? Math.Min(maxFrames.Value, totalFrames) : totalFrames;
+
+        activity?.SetTag(Diagnostics.Constants.FrameCaptureTotalFrames, totalFrames);
+        activity?.SetTag(Diagnostics.Constants.FrameCaptureMaxFrames, maxFrames);
 
         var frames = new Frame[maxFrames.Value];
 
@@ -58,7 +67,21 @@ public class VideoFrameCaptureManager
             if (frameTime > endTime)
                 break;
 
+            using var frameActivity = Diagnostics.ActivitySource?.StartActivity("CaptureFrame");
+
+            frameActivity?.SetTag(Diagnostics.Constants.FrameCaptureFrameNr, frameNr);
+            frameActivity?.SetTag(Diagnostics.Constants.FrameCaptureFrameTime, frameTime);
+
+            var sw = Stopwatch.StartNew();
+
             var (videoFrame, frameTs) = _frameExtractor.GetAtTimestamp(frameTime);
+
+            sw.Stop();
+
+            frameActivity?.SetTag(Diagnostics.Constants.FrameCaptureFrameTimestamp, frameTs);
+            frameActivity?.SetTag(Diagnostics.Constants.FrameCaptureElapsedTime, sw.Elapsed);
+
+            _logger?.LogDebug("Captured video frame {frameNr} at {frameTs} in {elapsed}", frameNr, frameTs, sw.Elapsed);
 
             if (videoFrame is null)
             {
@@ -91,12 +114,19 @@ public class VideoFrameCaptureManager
         int? maxFrames = null,
         [EnumeratorCancellation]CancellationToken ct = default)
     {
+        using var activity = Diagnostics.ActivitySource?.StartActivity("PerformFrameCaptureAsync");
+
         EnsureTimeSpansNotNull(ref startTime, ref endTime);
+
+        activity?.SetTag(Diagnostics.Constants.FrameCaptureStartTime, interval);
+        activity?.SetTag(Diagnostics.Constants.FrameCaptureEndTime, startTime);
+        activity?.SetTag(Diagnostics.Constants.FrameCaptureEndTime, endTime);
 
         var totalFrames = (int)Math.Floor((endTime.Value - startTime.Value) / interval);
         maxFrames = maxFrames.HasValue ? Math.Min(maxFrames.Value, totalFrames) : totalFrames;
 
-        var frames = new Frame[maxFrames.Value];
+        activity?.SetTag(Diagnostics.Constants.FrameCaptureTotalFrames, totalFrames);
+        activity?.SetTag(Diagnostics.Constants.FrameCaptureMaxFrames, maxFrames);
 
         for (var frameNr = 0; frameNr < maxFrames; frameNr++)
         {
@@ -108,11 +138,20 @@ public class VideoFrameCaptureManager
             if (frameTime > endTime)
                 break;
 
+            using var frameActivity = Diagnostics.ActivitySource?.StartActivity("CaptureFrame");
+
+            frameActivity?.SetTag(Diagnostics.Constants.FrameCaptureFrameNr, frameNr);
+            frameActivity?.SetTag(Diagnostics.Constants.FrameCaptureFrameTime, frameTime);
+
             var sw = Stopwatch.StartNew();
 
             var (videoFrame, frameTs) = await Task.Run(() => _frameExtractor.GetAtTimestamp(frameTime)).ConfigureAwait(false);
 
             sw.Stop();
+
+            frameActivity?.SetTag(Diagnostics.Constants.FrameCaptureFrameTimestamp, frameTs);
+            frameActivity?.SetTag(Diagnostics.Constants.FrameCaptureElapsedTime, sw.Elapsed);
+
             _logger?.LogDebug("Captured video frame {frameNr} at {frameTs} in {elapsed}", frameNr, frameTs, sw.Elapsed);
 
             if (videoFrame is null)

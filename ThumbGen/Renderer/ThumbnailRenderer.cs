@@ -40,12 +40,18 @@ namespace ThumbGen.Renderer
 
         public ThumbnailRenderResult Render(IReadOnlyList<Frame> frames, CancellationToken ct = default)
         {
+            using var activity = Diagnostics.ActivitySource?.StartActivity("Render");
+
+            activity?.SetTag(Diagnostics.Constants.RendererFrameCount, frames.Count);
             _logger?.LogDebug("Rendering thumbnail using {frameCount} frames", frames.Count);
             var sw = Stopwatch.StartNew();
 
             var totalSize = CalculateTotalSize(frames.Count);
             var canvas = _thumbnailRenderEngine.CreateCanvas(totalSize.Width, totalSize.Height);
             var frameMetadata = new List<ThumbnailFrameMetadata>();
+
+            activity?.SetTag(Diagnostics.Constants.RendererCanvasWidth, totalSize.Width);
+            activity?.SetTag(Diagnostics.Constants.RendererCanvasHeight, totalSize.Height);
 
             for (var row = 0; row < _renderingOptions.TilingOptions.Rows; row++)
             {
@@ -127,6 +133,7 @@ namespace ThumbGen.Renderer
             var image = canvas.Finish();
 
             sw.Stop();
+            activity?.SetTag(Diagnostics.Constants.RendererElapsedTime, sw.Elapsed);
             _logger?.LogInformation("Rendering completed in {renderTime}", sw.Elapsed);
 
             return new ThumbnailRenderResult(image, frameMetadata);

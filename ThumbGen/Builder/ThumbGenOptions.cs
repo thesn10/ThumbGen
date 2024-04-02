@@ -30,7 +30,7 @@ namespace ThumbGen.Builder
             return this;
         }
 
-        public ThumbGenOptions WithWebVTT(string? filepath = null, Func<string, int, string>? getImageUrl = null)
+        public ThumbGenOptions WithWebVTT(string? filepath = null, Func<string?, int, string>? getImageUrl = null)
         {
             GenerateWebVTT = true;
             if (filepath is not null)

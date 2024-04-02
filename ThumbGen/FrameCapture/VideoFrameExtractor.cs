@@ -39,6 +39,9 @@ namespace ThumbGen.FrameCapture
                 Width = codec.AVCodecContext.width;
                 Height = codec.AVCodecContext.height;
             }
+
+            if (_stream is null)
+                throw new ArgumentException("No video stream found");
         }
 
         public (VideoFrame, TimeSpan) GetAtTimestamp(TimeSpan ts)
