@@ -7,34 +7,94 @@ namespace ThumbGen.App;
 public static class CommandLineOptions
 {
     public static Option<TimeSpan> StartTimeOption { get; } = 
-        new Option<TimeSpan>("--start-time", () => TimeSpan.FromSeconds(60), "Start time");
+        new("--start-time")
+        {
+            Description = "Start time",
+            DefaultValueFactory = (_) => TimeSpan.FromSeconds(60),
+        };
     public static Option<TimeSpan> IntervalOption { get; } = 
-        new Option<TimeSpan>("--interval", () => TimeSpan.FromSeconds(5), "Interval");
+        new("--interval")
+        {
+            Description = "Interval",
+            DefaultValueFactory = (_) => TimeSpan.FromSeconds(5),
+        };
     public static Option<TimeSpan> EndTimeOption { get; } = 
-        new Option<TimeSpan>("--end-time", () => TimeSpan.FromMinutes(4), "End time");
+        new("--end-time")
+        {
+            Description = "End time",
+            DefaultValueFactory = (_) => TimeSpan.FromMinutes(4),
+        };
 
     public static Argument<FileInfo> InputFileArgument { get; } =
-        new Argument<FileInfo>("input-file", () => new FileInfo("./thumbnail_systemdrawing.bmp"), "Input filename");
+        new("input-file")
+        {
+            Description = "Input filename",
+            DefaultValueFactory = (_) => new FileInfo("./thumbnail_systemdrawing.bmp"),
+        };
     public static Argument<FileInfo> OutputFileArgument { get; } = 
-        new Argument<FileInfo>("output-file", () => new FileInfo("./thumbnail_systemdrawing.bmp"), "Output filename");
-    public static Option<bool> FastModeOption { get; } = 
-        new Option<bool>("--fast-mode", "Use fast mode");
-    public static Option<FileInfo> WebVTTOption { get; } = 
-        new Option<FileInfo>("--webvtt", () => new FileInfo("./storyboard.vtt"), "WebVTT file");
+        new("output-file")
+        {
+            Description = "Output filename",
+            DefaultValueFactory = (_) => new FileInfo("./thumbnail_systemdrawing.bmp"),
+        };
+
+    public static Option<bool> FastModeOption { get; } =
+        new Option<bool>("--fast-mode")
+        {
+            Description = "Use fast mode",
+            DefaultValueFactory = (_) => false,
+        };
+
+    public static Option<FileInfo> WebVTTOption { get; } =
+        new Option<FileInfo>("--webvtt")
+        {
+            Description = "WebVTT file",
+            DefaultValueFactory = (_) => new FileInfo("./storyboard.vtt"),
+        };
     public static Option<string> ImagePathOption { get; } = 
-        new Option<string>("--image-path", () => "/media/" + Path.GetFileName(Path.GetFullPath("./thumbnail_systemdrawing.bmp")), "Image path for WebVTT");
+        new Option<string>("--image-path")
+        {
+            Description = "Image path for WebVTT",
+            DefaultValueFactory = (_) => "/media/" + Path.GetFileName(Path.GetFullPath("./thumbnail_systemdrawing.bmp")),
+        };
     public static Option<int> FrameWidthOption { get; } = 
-        new Option<int>("--frame-width", () => 192, "Frame width");
+        new Option<int>("--frame-width")
+        {
+            Description = "Frame width",
+            DefaultValueFactory = (_) => 192,
+        };
     public static Option<int> FrameHeightOption { get; } = 
-        new Option<int>("--frame-height", () => 108, "Frame height");
+        new Option<int>("--frame-height")
+        {
+            Description = "Frame height",
+            DefaultValueFactory = (_) => 108,
+        };
     public static Option<int> ColumnsOption { get; } = 
-        new Option<int>("--columns", () => 4, "Columns for tiling");
+        new Option<int>("--columns")
+        {
+            Description = "Columns for tiling",
+            DefaultValueFactory = (_) => 4,
+        };
     public static Option<int> RowsOption { get; } = 
-        new Option<int>("--rows", () => 4, "Rows for tiling");
+        new Option<int>("--rows")
+        {
+            Description = "Rows for tiling",
+            DefaultValueFactory = (_) => 4,
+        };
     public static Option<int> BorderWidthOption { get; } = 
-        new Option<int>("--border-width", () => 8, "Border width");
+        new("--border-width")
+        {
+            Description = "Border width",
+            DefaultValueFactory = (_) => 8,
+        };
     public static Option<string> BackgroundGradientStartOption { get; } = 
-        new Option<string>("--background-gradient-start", "Background gradient start color");
+        new("--background-gradient-start")
+        {
+            Description = "Background gradient start color",
+        };
     public static Option<string> BackgroundGradientEndOption { get; } = 
-        new Option<string>("--background-gradient-end", "Background gradient end color");
+        new("--background-gradient-end")
+        {
+            Description = "Background gradient end color",
+        };
 }

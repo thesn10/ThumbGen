@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
+using System.CommandLine;
 using System.Drawing;
+using System.Threading;
 using System.Threading.Tasks;
 using ThumbGen.Builder;
 using ThumbGen.Options;
@@ -9,8 +11,15 @@ namespace ThumbGen.App
 {
     internal static class RunCommand
     {
-        internal static async Task<int> Run(ThumbnailOptions options, ILoggerFactory loggerFactory)
+        internal static async Task<int> Run(ParseResult parseResult, CancellationToken ct)
         {
+            var loggerFactory = LoggerFactory.Create(
+                builder => builder
+                    .AddConsole()
+                    .SetMinimumLevel(LogLevel.Information));
+            
+            var options = ThumbnailOptionsBinder.GetBoundValue(parseResult);
+            
             var opts = new ThumbGenOptions()
                 .WithStartTime(options.StartTime)
                 .WithInterval(options.Interval)
@@ -46,7 +55,7 @@ namespace ThumbGen.App
                 .ConfigureRendering(renderingOpts)
                 .Build("video.webm");
 
-            await thumbnailGenerator.ExecuteAsync(opts);
+            await thumbnailGenerator.ExecuteAsync(opts, ct);
 
             return 0;
         }

@@ -28,7 +28,7 @@ namespace ThumbGen.Magick
                 Marshal.Copy(frame.Data[0] + i * linesize, rawBytes, i * byteWidth, byteWidth);
 
             var pixelMapping = (frame.AVFrame.format == (int)AVPixelFormat.AV_PIX_FMT_BGRA) ? PixelMapping.BGRA : PixelMapping.BGR;
-            image.ReadPixels(rawBytes, new PixelReadSettings(width, height, StorageType.Char, pixelMapping));
+            image.ReadPixels(rawBytes, new PixelReadSettings((uint)width, (uint)height, StorageType.Char, pixelMapping));
             return image;
         }
 

@@ -33,9 +33,9 @@ class Program
         };
 
         var thumbnailOptionsBinder = new ThumbnailOptionsBinder();
+        
+        rootCommand.SetAction(RunCommand.Run);
 
-        rootCommand.SetHandler(RunCommand.Run, thumbnailOptionsBinder, new LoggerFactoryBinder());
-
-        return await rootCommand.InvokeAsync(args);
+        return await rootCommand.Parse(args).InvokeAsync();
     }
 }

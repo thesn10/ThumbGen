@@ -1,27 +1,28 @@
-﻿using System.CommandLine.Binding;
+﻿using System.CommandLine;
+using System.CommandLine.Binding;
 
 namespace ThumbGen.App;
 
-public class ThumbnailOptionsBinder : BinderBase<ThumbnailOptions>
+public class ThumbnailOptionsBinder
 {
-    protected override ThumbnailOptions GetBoundValue(BindingContext bindingContext) =>
+    public static ThumbnailOptions GetBoundValue(ParseResult parseResult) =>
         new()
         {
-            StartTime = bindingContext.ParseResult.GetValueForOption(CommandLineOptions.StartTimeOption),
-            Interval = bindingContext.ParseResult.GetValueForOption(CommandLineOptions.IntervalOption),
-            EndTime = bindingContext.ParseResult.GetValueForOption(CommandLineOptions.EndTimeOption),
-            InputFile = bindingContext.ParseResult.GetValueForArgument(CommandLineOptions.InputFileArgument),
-            OutputFile = bindingContext.ParseResult.GetValueForArgument(CommandLineOptions.OutputFileArgument),
-            FastMode = bindingContext.ParseResult.GetValueForOption(CommandLineOptions.FastModeOption),
-            WebVTT = bindingContext.ParseResult.GetValueForOption(CommandLineOptions.WebVTTOption),
-            ImagePath = bindingContext.ParseResult.GetValueForOption(CommandLineOptions.ImagePathOption),
-            FrameWidth = bindingContext.ParseResult.GetValueForOption(CommandLineOptions.FrameWidthOption),
-            FrameHeight = bindingContext.ParseResult.GetValueForOption(CommandLineOptions.FrameHeightOption),
-            Columns = bindingContext.ParseResult.GetValueForOption(CommandLineOptions.ColumnsOption),
-            Rows = bindingContext.ParseResult.GetValueForOption(CommandLineOptions.RowsOption),
-            BorderWidth = bindingContext.ParseResult.GetValueForOption(CommandLineOptions.BorderWidthOption),
-            BackgroundGradientStart = bindingContext.ParseResult.GetValueForOption(CommandLineOptions.BackgroundGradientStartOption),
-            BackgroundGradientEnd = bindingContext.ParseResult.GetValueForOption(CommandLineOptions.BackgroundGradientEndOption),
+            StartTime = parseResult.GetValue(CommandLineOptions.StartTimeOption),
+            Interval = parseResult.GetValue(CommandLineOptions.IntervalOption),
+            EndTime = parseResult.GetValue(CommandLineOptions.EndTimeOption),
+            InputFile = parseResult.GetValue(CommandLineOptions.InputFileArgument),
+            OutputFile = parseResult.GetValue(CommandLineOptions.OutputFileArgument),
+            FastMode = parseResult.GetValue(CommandLineOptions.FastModeOption),
+            WebVTT = parseResult.GetValue(CommandLineOptions.WebVTTOption),
+            ImagePath = parseResult.GetValue(CommandLineOptions.ImagePathOption),
+            FrameWidth = parseResult.GetValue(CommandLineOptions.FrameWidthOption),
+            FrameHeight = parseResult.GetValue(CommandLineOptions.FrameHeightOption),
+            Columns = parseResult.GetValue(CommandLineOptions.ColumnsOption),
+            Rows = parseResult.GetValue(CommandLineOptions.RowsOption),
+            BorderWidth = parseResult.GetValue(CommandLineOptions.BorderWidthOption),
+            BackgroundGradientStart = parseResult.GetValue(CommandLineOptions.BackgroundGradientStartOption),
+            BackgroundGradientEnd = parseResult.GetValue(CommandLineOptions.BackgroundGradientEndOption),
             // Add other rendering options here
         };
 }

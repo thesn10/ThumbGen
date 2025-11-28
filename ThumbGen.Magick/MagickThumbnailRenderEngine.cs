@@ -35,12 +35,12 @@ namespace ThumbGen.Magick
             if (_bgImage is not null)
             {
                 var image = _bgImage.Clone();
-                image.Crop(width, height);
+                image.Crop((uint)width, (uint)height);
                 return new MagickThumbnailCanvas(image, _colorOpts);
             }
             else
             {
-                var image = new MagickImage(_bgColor ?? MagickColors.Black, width, height);
+                var image = new MagickImage(_bgColor ?? MagickColors.Black, (uint)width, (uint)height);
                 return new MagickThumbnailCanvas(image, _colorOpts);
             }
         }
@@ -66,8 +66,8 @@ namespace ThumbGen.Magick
 
             var settings = new MagickReadSettings()
             {
-                Width = _size.Width,
-                Height = _size.Height,
+                Width = (uint)_size.Width,
+                Height = (uint)_size.Height,
             };
             settings.SetDefine(MagickFormat.Gradient, "angle", (int)Math.Round(gradient.Angle));
 

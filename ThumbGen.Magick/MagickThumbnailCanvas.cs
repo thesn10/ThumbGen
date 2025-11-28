@@ -1,6 +1,7 @@
 ﻿using EmguFFmpeg;
 using ImageMagick;
 using System.Drawing;
+using ImageMagick.Drawing;
 using ThumbGen.Engine;
 
 namespace ThumbGen.Magick
@@ -27,7 +28,7 @@ namespace ThumbGen.Magick
         {
             var bmp = videoFrame.ToMagickImage();
 
-            var geo = new MagickGeometry((int)width, (int)height)
+            var geo = new MagickGeometry((uint)width, (uint)height)
             {
                 IgnoreAspectRatio = true,
                 //LimitPixels = true,
@@ -71,7 +72,7 @@ namespace ThumbGen.Magick
                 BackgroundColor = MagickColors.None,
             });
 
-            var geo = new MagickGeometry((int)width, (int)height)
+            var geo = new MagickGeometry((uint)width, (uint)height)
             {
                 IgnoreAspectRatio = true,
                 FillArea = true,
