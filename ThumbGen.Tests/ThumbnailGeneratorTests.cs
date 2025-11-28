@@ -1,16 +1,29 @@
-using FFmpeg.AutoGen;
 using System.Drawing;
+using FFmpeg.AutoGen;
+using Xunit.Abstractions;
+using DynamicallyLoadedBindings = FFmpeg.AutoGen.Bindings.DynamicallyLoaded.DynamicallyLoadedBindings;
 
 namespace ThumbGen.Tests;
 
 public class ThumbnailGeneratorTests
 {
+    private readonly ITestOutputHelper _testOutputHelper;
+
+    public ThumbnailGeneratorTests(ITestOutputHelper testOutputHelper)
+    {
+        _testOutputHelper = testOutputHelper;
+    }
+
     [Fact]
     public async Task ThumbnailGenerator_DoesNotThrowAnyExeption()
     {
         var ffmpegPath = Environment.GetEnvironmentVariable("TG_FFMPEG_ROOT_PATH");
         if (!string.IsNullOrWhiteSpace(ffmpegPath))
+        {
             ffmpeg.RootPath = ffmpegPath;
+            DynamicallyLoadedBindings.LibrariesPath = ffmpegPath;
+            DynamicallyLoadedBindings.Initialize();
+        }
 
         var opts = new ThumbGenOptions()
             .WithStartTime(TimeSpan.FromSeconds(60))
@@ -54,7 +67,11 @@ public class ThumbnailGeneratorTests
     {
         var ffmpegPath = Environment.GetEnvironmentVariable("TG_FFMPEG_ROOT_PATH");
         if (!string.IsNullOrWhiteSpace(ffmpegPath))
+        {
             ffmpeg.RootPath = ffmpegPath;
+            DynamicallyLoadedBindings.LibrariesPath = ffmpegPath;
+            DynamicallyLoadedBindings.Initialize();
+        }
 
         var opts = new ThumbGenOptions()
             .WithStartTime(TimeSpan.FromSeconds(60))
