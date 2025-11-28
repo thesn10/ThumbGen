@@ -1,6 +1,10 @@
-﻿using EmguFFmpeg;
+﻿using System;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using FFmpeg.AutoGen.Abstractions;
+using FFmpegSharp;
 using ThumbGen.Engine;
 
 namespace ThumbGen.SystemDrawing
@@ -34,9 +38,9 @@ namespace ThumbGen.SystemDrawing
             _graphics.FillRectangle(_aspectOverlapBrush, x, y, width, height);
         }
 
-        public void DrawImage(VideoFrame videoFrame, float x, float y, float width, float height)
+        public void DrawImage(MediaFrame videoFrame, float x, float y, float width, float height)
         {
-            _graphics.DrawImage(videoFrame.ToBitmap(), x, y, width, height);
+            _graphics.DrawImage(FrameToBitmap(videoFrame), x, y, width, height);
         }
 
         public void DrawTimeCode(string tsString, string fontFamily, float fontSize, float originX, float originY, SizeF frameSize)
@@ -60,6 +64,33 @@ namespace ThumbGen.SystemDrawing
         {
             _graphics.Flush();
             return new SystemDrawingThumbnailResult(_bitmap);
+        }
+        
+        private static Bitmap FrameToBitmap(MediaFrame frame)
+        {
+            if ((AVPixelFormat)frame.Format == AVPixelFormat.AV_PIX_FMT_BGRA || (AVPixelFormat)frame.Format == AVPixelFormat.AV_PIX_FMT_BGR24)
+                return BgraToMat(frame);
+            
+            using (PixelConverter converter = PixelConverter.Create(frame.Width, frame.Height, AVPixelFormat.AV_PIX_FMT_BGRA))
+            {
+                return BgraToMat(converter.ConvertFrame(frame));
+            }
+        }
+        
+        private static Bitmap BgraToMat(MediaFrame frame)
+        {
+            int width = frame.Width;
+            int height = frame.Height;
+            Bitmap bitmap = new Bitmap(width, height, (AVPixelFormat)frame.Format == AVPixelFormat.AV_PIX_FMT_BGRA ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb);
+            BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
+            bitmapData.Stride = frame.Linesize[0];
+            
+            var data = frame.GetBytes();
+            
+            Marshal.Copy(data,0, bitmapData.Scan0, data.Length);
+            
+            bitmap.UnlockBits(bitmapData);
+            return bitmap;
         }
     }
 }

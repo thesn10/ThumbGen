@@ -1,10 +1,9 @@
-﻿using EmguFFmpeg;
-using System;
-using System.Drawing;
+﻿using System;
+using FFmpegSharp;
 
 namespace ThumbGen.FrameCapture;
 
-public record Frame(VideoFrame VideoFrame, TimeSpan Timestamp)
+public record Frame(MediaFrame VideoFrame, TimeSpan Timestamp)
 {
     public string GetTimestampString() => Timestamp.ToString(@"hh\:mm\:ss");
 }

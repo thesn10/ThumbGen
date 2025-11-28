@@ -1,6 +1,6 @@
-﻿using EmguFFmpeg;
-using ImageMagick;
+﻿using ImageMagick;
 using System.Drawing;
+using FFmpegSharp;
 using ImageMagick.Drawing;
 using ThumbGen.Engine;
 
@@ -24,7 +24,7 @@ namespace ThumbGen.Magick
                 .Draw(_image);
         }
 
-        public void DrawImage(VideoFrame videoFrame, float x, float y, float width, float height)
+        public void DrawImage(MediaFrame videoFrame, float x, float y, float width, float height)
         {
             var bmp = videoFrame.ToMagickImage();
 

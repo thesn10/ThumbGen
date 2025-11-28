@@ -1,46 +1,34 @@
-﻿using EmguFFmpeg;
-using FFmpeg.AutoGen;
+﻿using FFmpeg.AutoGen.Abstractions;
 using ImageMagick;
 using System.Drawing.Imaging;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using System;
+using FFmpegSharp;
 
 namespace ThumbGen.Magick
 {
     internal static class VideoFrameExtensions
     {
-        private unsafe static MagickImage BgraToMagickImage(VideoFrame frame)
+        private static MagickImage BgraToMagickImage(MediaFrame frame)
         {
-            int width = frame.Width;
-            int height = frame.Height;
             var image = new MagickImage();
-            var linesize = frame.Linesize[0];
-            int byteWidth = (frame.AVFrame.format == (int)AVPixelFormat.AV_PIX_FMT_BGRA) ? 4 * width : 3 * width;
+            byte[] rawBytes = frame.GetBytes();
 
-            byte[] rawBytes = new byte[byteWidth * height];
-            /*fixed (byte* p = rawBytes)
-            {
-                FFmpegHelper.CopyPlane(frame.Data[0], frame.Linesize[0], (nint)p, byteWidth, byteWidth, height);
-            }*/
-            for (int i = 0; i < height; i++)
-                Marshal.Copy(frame.Data[0] + i * linesize, rawBytes, i * byteWidth, byteWidth);
-
-            var pixelMapping = (frame.AVFrame.format == (int)AVPixelFormat.AV_PIX_FMT_BGRA) ? PixelMapping.BGRA : PixelMapping.BGR;
-            image.ReadPixels(rawBytes, new PixelReadSettings((uint)width, (uint)height, StorageType.Char, pixelMapping));
+            var pixelMapping = (frame.Format == (int)AVPixelFormat.AV_PIX_FMT_BGRA) ? PixelMapping.BGRA : PixelMapping.BGR;
+            image.ReadPixels(rawBytes, new PixelReadSettings((uint)frame.Width, (uint)frame.Height, StorageType.Char, pixelMapping));
             return image;
         }
 
-        public static MagickImage ToMagickImage(this VideoFrame frame)
+        public static MagickImage ToMagickImage(this MediaFrame frame)
         {
-            if (frame.AVFrame.format == 28 || frame.AVFrame.format == 3)
+            if (frame.Format == 28 || frame.Format == 3)
             {
                 return BgraToMagickImage(frame);
             }
-
-            using var dstFrame = new VideoFrame(frame.AVFrame.width, frame.AVFrame.height, AVPixelFormat.AV_PIX_FMT_BGRA);
-            using var pixelConverter = new PixelConverter(dstFrame);
+            
+            using var pixelConverter = PixelConverter.Create(frame.Width, frame.Height, AVPixelFormat.AV_PIX_FMT_BGRA);
             return BgraToMagickImage(pixelConverter.ConvertFrame(frame));
         }
     }
