@@ -20,9 +20,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FFmpeg.AutoGen" Version="7.1.1" />
-    <PackageReference Include="FFmpeg.AutoGen.Abstractions" Version="7.1.1" />
-    <PackageReference Include="FFmpeg.AutoGen.Bindings.DynamicallyLoaded" Version="7.1.1" />
+    <PackageReference Include="FFmpeg.AutoGen" Version="8.1.0" />
+    <PackageReference Include="FFmpeg.AutoGen.Abstractions" Version="8.1.0" />
+    <PackageReference Include="FFmpeg.AutoGen.Bindings.DynamicallyLoaded" Version="8.1.0" />
+    <!-- Pinned to 7.0.1: no 8.x exists. See docs/ffmpeg-bindings.md before using FFmpegSharp filters. -->
     <PackageReference Include="FFmpeg4Sharp" Version="7.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="10.0.0" />
