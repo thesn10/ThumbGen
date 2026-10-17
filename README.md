@@ -79,4 +79,4 @@ thumbgen input.mp4 output.jpg --fast-mode
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE.md). Feel free to use and contribute to make ThumbGen even better!
+This project is released into the public domain under the [Unlicense](LICENSE.md). You can do whatever you want with it.

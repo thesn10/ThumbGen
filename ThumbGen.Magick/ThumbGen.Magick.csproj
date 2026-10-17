@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	<Authors>TheSN</Authors>
-	<Copyright>MIT</Copyright>
+	<PackageLicenseExpression>Unlicense</PackageLicenseExpression>
 	<RepositoryUrl>https://github.com/thesn10/ThumbGen</RepositoryUrl>
 	<PackageTags>thumbnail, thumbnails, thumbnail generator, thumbnailer, video thumbnail, media thumbailer, storyboard, webvtt</PackageTags>
 	<Description>Magick thumbnail renderer for ThumbGen, a customizable cross-platform blazing-fast video thumbnail generator with many options for .NET 8</Description>
