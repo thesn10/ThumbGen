@@ -61,10 +61,8 @@ namespace ThumbGen.FrameCapture
                 Height = decoder.Height;
             }
 
-            if (_stream is null)
-                throw new ArgumentException("No video stream found");
-            if (_decoder is null)
-                throw new ArgumentException("Could not create decoder");
+            if (_stream is null || _decoder is null)
+                throw new NoVideoStreamException(filename);
         }
 
         public (MediaFrame, TimeSpan) GetAtTimestamp(TimeSpan ts)
@@ -96,7 +94,7 @@ namespace ThumbGen.FrameCapture
                 }
             }
             
-            throw new Exception("Reached end of file not finding vaild frame");
+            throw new VideoDecodeException("Reached end of file without finding a valid frame");
         }
     }
 }
