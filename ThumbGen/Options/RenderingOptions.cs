@@ -26,6 +26,7 @@ namespace ThumbGen.Options
         internal Size? FrameSize { get; set; } = null;
         internal TilingOptions TilingOptions { get; } = new TilingOptions();
         internal float? TimeCodeFontSize { get; private set; }
+        internal string TimeCodeFontFamily { get; private set; } = "Consolas";
         internal string? WatermarkFilename { get; set; }
         internal Size? WatermarkSize { get; set; }
         internal WatermarkPosition? WatermarkPosition { get; set; }
@@ -143,6 +144,12 @@ namespace ThumbGen.Options
         {
             TimeCodeFontSize = size;
             return this;
+        }
+
+        public RenderingOptions WithTimeCode(float size, string fontFamily)
+        {
+            TimeCodeFontFamily = fontFamily;
+            return WithTimeCode(size);
         }
 
         internal ThumbnailSizing CalcSizes(int width, int height)

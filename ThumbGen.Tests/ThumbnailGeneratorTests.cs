@@ -85,6 +85,24 @@ public class ThumbnailGeneratorTests
     }
 
     [Fact]
+    public async Task MagickRenderer_WithUnavailableTimeCodeFont_FallsBackAndWritesThumbnail()
+    {
+        using var dir = new TempDirectory();
+        var renderingOpts = SmallTiling().WithTimeCode(14f, "Font That Does Not Exist");
+
+        using var generator = ThumbnailGeneratorBuilder
+            .Create()
+            .WithFFmpegVideoCapture()
+            .UseMagickRenderer()
+            .ConfigureRendering(renderingOpts)
+            .Build(VideoConstants.Video_360p_MP4());
+
+        await generator.ExecuteAsync(Options(dir, "thumbnail.jpg"));
+
+        Assert.True(new FileInfo(dir.File("thumbnail.jpg")).Length > 0);
+    }
+
+    [Fact]
     public async Task Generator_CanBeExecutedRepeatedly()
     {
         using var dir = new TempDirectory();

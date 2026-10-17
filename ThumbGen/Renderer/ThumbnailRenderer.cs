@@ -115,7 +115,7 @@ namespace ThumbGen.Renderer
                         var tsString = frame.GetTimestampString();
                         var fontSize = _renderingOptions.TimeCodeFontSize.Value;
 
-                        canvas.DrawTimeCode(tsString, "Consolas", fontSize, originX, originY, _frameSize);
+                        canvas.DrawTimeCode(tsString, _renderingOptions.TimeCodeFontFamily, fontSize, originX, originY, _frameSize);
                     }
 
                     ct.ThrowIfCancellationRequested();
