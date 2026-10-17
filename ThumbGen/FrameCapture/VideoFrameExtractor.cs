@@ -32,6 +32,9 @@ namespace ThumbGen.FrameCapture
 
             try
             {
+                if (_reader.Duration == ffmpeg.AV_NOPTS_VALUE)
+                    throw new UnknownDurationException(filename);
+
                 Duration = TimeSpan.FromMilliseconds((double)_reader.Duration / 1000);
                 for (var i = 0; i < _reader.Count; i++)
                 {
