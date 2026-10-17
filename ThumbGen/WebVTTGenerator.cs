@@ -109,12 +109,7 @@ namespace ThumbGen
         {
             var start = frame.Timestamp;
 
-            var webvttSection = $"""
-
-                    {start:hh\:mm\:ss\.fff} --> {end:hh\:mm\:ss\.fff}
-                    {imageUrl}#xywh={frame.X},{frame.Y},{frame.Width},{frame.Height}
-
-                    """;
+            var webvttSection = $"\n{start:hh\\:mm\\:ss\\.fff} --> {end:hh\\:mm\\:ss\\.fff}\n{imageUrl}#xywh={frame.X},{frame.Y},{frame.Width},{frame.Height}\n";
             WriteToOutput(_output, webvttSection.AsSpan());
 
             var result = await _output.FlushAsync(ct).ConfigureAwait(false);
