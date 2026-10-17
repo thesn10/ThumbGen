@@ -30,39 +30,47 @@ namespace ThumbGen.FrameCapture
                 throw new VideoOpenException(filename, ex);
             }
 
-            Duration = TimeSpan.FromMilliseconds((double)_reader.Duration / 1000);
-            for (var i = 0; i < _reader.Count; i++)
+            try
             {
-                var stream = _reader[i];
+                Duration = TimeSpan.FromMilliseconds((double)_reader.Duration / 1000);
+                for (var i = 0; i < _reader.Count; i++)
+                {
+                    var stream = _reader[i];
                 
-                if ((stream.Disposition & ffmpeg.AV_DISPOSITION_ATTACHED_PIC) == ffmpeg.AV_DISPOSITION_ATTACHED_PIC)
-                {
-                    continue;
+                    if ((stream.Disposition & ffmpeg.AV_DISPOSITION_ATTACHED_PIC) == ffmpeg.AV_DISPOSITION_ATTACHED_PIC)
+                    {
+                        continue;
+                    }
+
+                    MediaDecoder decoder;
+                    try
+                    {
+                        decoder = MediaDecoder.CreateDecoder(stream.CodecparRef);
+                    }
+                    catch (FFmpegException ex)
+                    {
+                        throw new VideoDecodeException(ex);
+                    }
+
+                    if (decoder.CodecType != AVMediaType.AVMEDIA_TYPE_VIDEO)
+                    {
+                        continue;
+                    }
+
+                    _stream = stream;
+                    _decoder = decoder;
+                    Width = decoder.Width;
+                    Height = decoder.Height;
                 }
 
-                MediaDecoder decoder;
-                try
-                {
-                    decoder = MediaDecoder.CreateDecoder(stream.CodecparRef);
-                }
-                catch (FFmpegException ex)
-                {
-                    throw new VideoDecodeException(ex);
-                }
-
-                if (decoder.CodecType != AVMediaType.AVMEDIA_TYPE_VIDEO)
-                {
-                    continue;
-                }
-
-                _stream = stream;
-                _decoder = decoder;
-                Width = decoder.Width;
-                Height = decoder.Height;
+                if (_stream is null || _decoder is null)
+                    throw new NoVideoStreamException(filename);
             }
-
-            if (_stream is null || _decoder is null)
-                throw new NoVideoStreamException(filename);
+            catch
+            {
+                _reader.Dispose();
+                throw;
+            }
         }
 
         public (MediaFrame, TimeSpan) GetAtTimestamp(TimeSpan ts)
