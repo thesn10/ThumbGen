@@ -34,7 +34,7 @@ public static class CommandLineOptions
         new("output-file")
         {
             Description = "Output filename",
-            DefaultValueFactory = (_) => new FileInfo("./thumbnail_systemdrawing.bmp"),
+            DefaultValueFactory = (_) => new FileInfo("./thumbnail.bmp"),
         };
 
     public static Option<bool> FastModeOption { get; } =
@@ -54,7 +54,7 @@ public static class CommandLineOptions
         new Option<string>("--image-path")
         {
             Description = "Image path for WebVTT",
-            DefaultValueFactory = (_) => "/media/" + Path.GetFileName(Path.GetFullPath("./thumbnail_systemdrawing.bmp")),
+            DefaultValueFactory = (_) => "/media/" + Path.GetFileName(Path.GetFullPath("./thumbnail.bmp")),
         };
     public static Option<int> FrameWidthOption { get; } = 
         new Option<int>("--frame-width")
