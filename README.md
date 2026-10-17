@@ -69,6 +69,14 @@ dotnet add package ThumbGen.Magick # if using ImageMagick renderer
 
 Make sure to initialize the FFmpeg bindings as described in the [FFmpeg](#ffmpeg) section.
 
+## Command line tool
+
+Each [GitHub release](../../releases) contains self-contained `thumbgen` executables for `win-x64`, `linux-x64`, `linux-arm64` and `osx-arm64` (verify them with `SHA256SUMS`). FFmpeg is not included: install the FFmpeg 8.1.x shared libraries and either make them discoverable by the system or set `TG_FFMPEG_ROOT_PATH` to their directory.
+
+```bash
+thumbgen input.mp4 output.jpg --fast-mode
+```
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE.md). Feel free to use and contribute to make ThumbGen even better!

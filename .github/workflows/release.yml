@@ -47,3 +47,62 @@ jobs:
       run: dotnet nuget push ThumbGen.${{ github.event.release.tag_name }}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
     - name: Push ThumbGen.Magick to Nuget
       run: dotnet nuget push ThumbGen.Magick.${{ github.event.release.tag_name }}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+
+  cli:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - rid: win-x64
+          archive: zip
+        - rid: linux-x64
+          archive: tar.gz
+        - rid: linux-arm64
+          archive: tar.gz
+        - rid: osx-arm64
+          archive: tar.gz
+    env:
+      TAG: ${{ github.event.release.tag_name }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+    - name: Publish
+      run: dotnet publish ThumbGen.App --configuration Release --runtime ${{ matrix.rid }} --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:Version=$TAG --output publish
+    - name: Package
+      run: |
+        name=thumbgen-$TAG-${{ matrix.rid }}
+        if [ "${{ matrix.rid }}" = win-x64 ]; then ext=.exe; else ext=; fi
+        mkdir $name
+        mv publish/ThumbGen.App$ext $name/thumbgen$ext
+        cp LICENSE.md README.md $name/
+        if [ "${{ matrix.archive }}" = zip ]; then zip -r $name.zip $name; else tar -czf $name.tar.gz $name; fi
+    - name: Upload to release
+      run: gh release upload $TAG thumbgen-$TAG-${{ matrix.rid }}.${{ matrix.archive }} --clobber
+
+  checksums:
+    needs: cli
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ github.event.release.tag_name }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+    - name: Create SHA256SUMS
+      run: |
+        gh release download $TAG --pattern 'thumbgen-*'
+        sha256sum thumbgen-* > SHA256SUMS
+        gh release upload $TAG SHA256SUMS --clobber
