@@ -26,11 +26,10 @@ public static class CommandLineOptions
         };
 
     public static Argument<FileInfo> InputFileArgument { get; } =
-        new("input-file")
+        new Argument<FileInfo>("input-file")
         {
-            Description = "Input filename",
-            DefaultValueFactory = (_) => new FileInfo("./thumbnail_systemdrawing.bmp"),
-        };
+            Description = "Input video file",
+        }.AcceptExistingOnly();
     public static Argument<FileInfo> OutputFileArgument { get; } = 
         new("output-file")
         {
