@@ -51,9 +51,18 @@ namespace ThumbGen.App
             else
                 builder.UseMagickRenderer();
 
-            var thumbnailGenerator = builder
-                .ConfigureRendering(renderingOpts)
-                .Build(options.InputFile.FullName);
+            builder.ConfigureRendering(renderingOpts);
+
+            ThumbnailGenerator thumbnailGenerator;
+            try
+            {
+                thumbnailGenerator = builder.Build(options.InputFile.FullName);
+            }
+            catch (VideoOpenException ex)
+            {
+                await Console.Error.WriteLineAsync($"Error: {ex.Message}");
+                return 1;
+            }
 
             await thumbnailGenerator.ExecuteAsync(opts, ct);
 

@@ -8,12 +8,11 @@ class Program
 {
     static async Task<int> Main(string[] args)
     {
-        // Without TG_FFMPEG_ROOT_PATH the default library search locations are used.
         try
         {
             FFmpegBindings.Initialize(Environment.GetEnvironmentVariable("TG_FFMPEG_ROOT_PATH"));
         }
-        catch (InvalidOperationException ex)
+        catch (FFmpegBindingsException ex)
         {
             await Console.Error.WriteLineAsync($"Error: {ex.Message}");
             await Console.Error.WriteLineAsync("Set TG_FFMPEG_ROOT_PATH to the directory containing the FFmpeg shared libraries.");

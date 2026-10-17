@@ -21,7 +21,15 @@ namespace ThumbGen.FrameCapture
         {
             FFmpegBindings.EnsureInitialized();
 
-            _reader = MediaDemuxer.Open(filename);
+            try
+            {
+                _reader = MediaDemuxer.Open(filename);
+            }
+            catch (FFmpegException ex)
+            {
+                throw new VideoOpenException(filename, ex);
+            }
+
             Duration = TimeSpan.FromMilliseconds((double)_reader.Duration / 1000);
             for (var i = 0; i < _reader.Count; i++)
             {

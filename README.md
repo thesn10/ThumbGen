@@ -52,7 +52,7 @@ using ThumbGen;
 FFmpegBindings.Initialize("/your/path/to/ffmpeg/libraries/");
 ```
 
-If the bindings are not initialized, the libraries cannot be found, or their version does not match, ThumbGen throws an `InvalidOperationException` describing the problem.
+If the bindings are not initialized, the libraries cannot be found, or their version does not match, ThumbGen throws a `FFmpegBindingsException` describing the problem.
 
 If you use your own bindings (e.g. `FFmpeg.AutoGen.Bindings.StaticallyLinked`) instead, skip `Initialize`; ThumbGen only checks that the bindings are usable and of a compatible version.
 
