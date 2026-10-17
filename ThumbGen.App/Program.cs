@@ -1,4 +1,3 @@
-﻿using FFmpeg.AutoGen;
 using System;
 using System.CommandLine;
 using System.Threading.Tasks;
@@ -9,9 +8,17 @@ class Program
 {
     static async Task<int> Main(string[] args)
     {
-        var ffmpegPath = Environment.GetEnvironmentVariable("TG_FFMPEG_ROOT_PATH");
-        if (!string.IsNullOrWhiteSpace(ffmpegPath))
-            ffmpeg.RootPath = ffmpegPath;
+        // Without TG_FFMPEG_ROOT_PATH the default library search locations are used.
+        try
+        {
+            FFmpegBindings.Initialize(Environment.GetEnvironmentVariable("TG_FFMPEG_ROOT_PATH"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            await Console.Error.WriteLineAsync($"Error: {ex.Message}");
+            await Console.Error.WriteLineAsync("Set TG_FFMPEG_ROOT_PATH to the directory containing the FFmpeg shared libraries.");
+            return 1;
+        }
 
         var rootCommand = new RootCommand
         {
@@ -33,7 +40,7 @@ class Program
         };
 
         var thumbnailOptionsBinder = new ThumbnailOptionsBinder();
-        
+
         rootCommand.SetAction(RunCommand.Run);
 
         return await rootCommand.Parse(args).InvokeAsync();

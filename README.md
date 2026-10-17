@@ -41,13 +41,22 @@ Feel free to customize the options and rendering settings based on your specific
 
 ## FFmpeg
 
-ThumbGen relies on FFmpeg libraries for its functionality. Ensure you set `ffmpeg.RootPath` with the full path to the FFmpeg libraries for the proper execution of the tool.
+ThumbGen relies on the native FFmpeg shared libraries (**FFmpeg 8.1.x**, i.e. `libavformat.so.62` / `avformat-62.dll` or the platform equivalent). They are not bundled; you are responsible for installing or shipping them.
+
+FFmpeg.AutoGen's function bindings stay uninitialized until you load them. Call `FFmpegBindings.Initialize` once at application startup, before using ThumbGen:
 
 ```csharp
-using FFmpeg.AutoGen;
+using ThumbGen;
 
-ffmpeg.RootPath = "/your/path/to/ffmpeg/libraries/"
+// Directory containing the FFmpeg libraries. Pass null to use the OS default library search locations.
+FFmpegBindings.Initialize("/your/path/to/ffmpeg/libraries/");
 ```
+
+If the bindings are not initialized, the libraries cannot be found, or their version does not match, ThumbGen throws an `InvalidOperationException` describing the problem.
+
+If you use your own bindings (e.g. `FFmpeg.AutoGen.Bindings.StaticallyLinked`) instead, skip `Initialize`; ThumbGen only checks that the bindings are usable and of a compatible version.
+
+If you call `DynamicallyLoadedBindings.Initialize()` yourself, note that `FFmpeg.AutoGen.DynamicallyLoadedBindings` (legacy) and `FFmpeg.AutoGen.Bindings.DynamicallyLoaded.DynamicallyLoadedBindings` clash when both namespaces are imported; use a `using` alias.
 
 ## Installation
 
@@ -58,7 +67,7 @@ dotnet add package ThumbGen
 dotnet add package ThumbGen.Magick # if using ImageMagick renderer
 ```
 
-Ensure that you also set the FFmpeg library path as mentioned in the dependencies.
+Make sure to initialize the FFmpeg bindings as described in the [FFmpeg](#ffmpeg) section.
 
 ## License
 

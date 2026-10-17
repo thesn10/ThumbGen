@@ -19,6 +19,8 @@ namespace ThumbGen.FrameCapture
 
         public VideoFrameExtractor(string filename)
         {
+            FFmpegBindings.EnsureInitialized();
+
             _reader = MediaDemuxer.Open(filename);
             Duration = TimeSpan.FromMilliseconds((double)_reader.Duration / 1000);
             for (var i = 0; i < _reader.Count; i++)

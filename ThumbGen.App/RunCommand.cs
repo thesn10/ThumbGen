@@ -53,7 +53,7 @@ namespace ThumbGen.App
 
             var thumbnailGenerator = builder
                 .ConfigureRendering(renderingOpts)
-                .Build("video.webm");
+                .Build(options.InputFile.FullName);
 
             await thumbnailGenerator.ExecuteAsync(opts, ct);
 
