@@ -8,6 +8,8 @@ namespace ThumbGen.Magick
 {
     internal class MagickThumbnailCanvas : IThumbnailCanvas
     {
+        private const string FallbackFont = "DejaVu-Sans-Mono";
+
         private readonly IMagickImage<byte> _image;
         private readonly MagickEngineColorOptions _colorOpts;
 
@@ -44,7 +46,7 @@ namespace ThumbGen.Magick
         {
             var settings = new MagickReadSettings
             {
-                Font = "Consolas",
+                Font = fontFamily,
                 TextGravity = Gravity.Center,
                 BackgroundColor = MagickColors.Transparent,
                 FillColor = _colorOpts.TimeCodeColor,
@@ -53,7 +55,7 @@ namespace ThumbGen.Magick
                 Density = new Density(120), // TODO
             };
 
-            using var caption = new MagickImage($"caption:{tsString}", settings);
+            using var caption = CreateCaption(tsString, settings);
 
             var textX = originX + frameSize.Width - caption.Width;
             var textY = originY + frameSize.Height - caption.Height;
@@ -63,6 +65,19 @@ namespace ThumbGen.Magick
                 .Draw(_image);
 
             _image.Composite(caption, (int)textX, (int)textY, CompositeOperator.Over);
+        }
+
+        private static MagickImage CreateCaption(string text, MagickReadSettings settings)
+        {
+            try
+            {
+                return new MagickImage($"caption:{text}", settings);
+            }
+            catch (MagickTypeErrorException)
+            {
+                settings.Font = FallbackFont;
+                return new MagickImage($"caption:{text}", settings);
+            }
         }
 
         public void DrawWatermark(string watermarkFilename, float x, float y, float width, float height)
