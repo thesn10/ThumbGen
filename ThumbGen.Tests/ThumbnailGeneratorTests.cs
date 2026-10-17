@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Runtime.Versioning;
 
 namespace ThumbGen.Tests;
 
@@ -21,17 +22,19 @@ public class ThumbnailGeneratorTests
         .WithWebVTT(dir.File("storyboard.vtt"), (imagePath, index) => "/media/" + Path.GetFileName(imagePath));
 
     [WindowsFact]
+    [SupportedOSPlatform("windows")]
     public async Task SystemDrawingRenderer_WritesThumbnailAndWebVTT()
     {
         using var dir = new TempDirectory();
 
-        await ThumbnailGeneratorBuilder
+        using var generator = ThumbnailGeneratorBuilder
             .Create()
             .WithFFmpegVideoCapture()
             .UseSystemDrawingRenderer()
             .ConfigureRendering(SmallTiling())
-            .Build(VideoConstants.Video_360p_MP4())
-            .ExecuteAsync(Options(dir, "thumbnail.bmp"));
+            .Build(VideoConstants.Video_360p_MP4());
+
+        await generator.ExecuteAsync(Options(dir, "thumbnail.bmp"));
 
         Assert.True(new FileInfo(dir.File("thumbnail.bmp")).Length > 0);
         Assert.StartsWith("WEBVTT", await File.ReadAllTextAsync(dir.File("storyboard.vtt")));
@@ -42,13 +45,14 @@ public class ThumbnailGeneratorTests
     {
         using var dir = new TempDirectory();
 
-        await ThumbnailGeneratorBuilder
+        using var generator = ThumbnailGeneratorBuilder
             .Create()
             .WithFFmpegVideoCapture()
             .UseMagickRenderer()
             .ConfigureRendering(SmallTiling())
-            .Build(VideoConstants.Video_360p_MP4())
-            .ExecuteAsync(Options(dir, "thumbnail.jpg"));
+            .Build(VideoConstants.Video_360p_MP4());
+
+        await generator.ExecuteAsync(Options(dir, "thumbnail.jpg"));
 
         Assert.True(new FileInfo(dir.File("thumbnail.jpg")).Length > 0);
 
@@ -68,13 +72,14 @@ public class ThumbnailGeneratorTests
             .UseTimeCodeBackgroundColor(Color.Black)
             .UseTimeCodeColor(Color.White);
 
-        await ThumbnailGeneratorBuilder
+        using var generator = ThumbnailGeneratorBuilder
             .Create()
             .WithFFmpegVideoCapture()
             .UseMagickRenderer()
             .ConfigureRendering(renderingOpts)
-            .Build(VideoConstants.Video_360p_MP4())
-            .ExecuteAsync(Options(dir, "thumbnail.jpg"));
+            .Build(VideoConstants.Video_360p_MP4());
+
+        await generator.ExecuteAsync(Options(dir, "thumbnail.jpg"));
 
         Assert.True(new FileInfo(dir.File("thumbnail.jpg")).Length > 0);
     }
@@ -83,7 +88,7 @@ public class ThumbnailGeneratorTests
     public async Task Generator_CanBeExecutedRepeatedly()
     {
         using var dir = new TempDirectory();
-        var generator = ThumbnailGeneratorBuilder
+        using var generator = ThumbnailGeneratorBuilder
             .Create()
             .WithFFmpegVideoCapture()
             .UseMagickRenderer()

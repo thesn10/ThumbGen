@@ -40,6 +40,18 @@ namespace ThumbGen.Renderer
 
         public ThumbnailRenderResult Render(IReadOnlyList<Frame> frames, CancellationToken ct = default)
         {
+            try
+            {
+                return RenderFrames(frames, ct);
+            }
+            finally
+            {
+                DisposeAll(frames);
+            }
+        }
+
+        private ThumbnailRenderResult RenderFrames(IReadOnlyList<Frame> frames, CancellationToken ct)
+        {
             using var activity = Diagnostics.ActivitySource?.StartActivity("Render");
 
             activity?.SetTag(Diagnostics.Constants.RendererFrameCount, frames.Count);
@@ -95,7 +107,6 @@ namespace ThumbGen.Renderer
                     }
 
                     canvas.DrawImage(frame.VideoFrame, x, y, width, height);
-                    frame.VideoFrame.Dispose();
 
                     frameMetadata.Add(new ThumbnailFrameMetadata(frame.Timestamp, (int)originX, (int)originY, (int)width, (int)height));
 
@@ -139,6 +150,12 @@ namespace ThumbGen.Renderer
             return new ThumbnailRenderResult(image, frameMetadata);
         }
 
+        private static void DisposeAll(IEnumerable<Frame> frames)
+        {
+            foreach (var frame in frames)
+                frame?.Dispose();
+        }
+
         private Size CalculateTotalSize(int framesCount)
         {
             if (framesCount >= FramesPerThumbnail)
@@ -168,7 +185,11 @@ namespace ThumbGen.Renderer
             await foreach (var currentFrames in frames.Buffer(FramesPerThumbnail).WithCancellation(ct).ConfigureAwait(false))
             {
                 if (currentFrames.Count == 0) break;
-                if (ct.IsCancellationRequested) break;
+                if (ct.IsCancellationRequested)
+                {
+                    DisposeAll(currentFrames);
+                    break;
+                }
 
                 ThumbnailRenderResult renderResult;
                 try
@@ -181,6 +202,7 @@ namespace ThumbGen.Renderer
                 }
                 catch (OperationCanceledException)
                 {
+                    DisposeAll(currentFrames);
                     yield break;
                 }
 

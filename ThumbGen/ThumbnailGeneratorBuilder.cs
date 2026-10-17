@@ -89,7 +89,18 @@ namespace ThumbGen
 
             var frameCaptureManager = FrameCaptureManagerFactory(inputFilePath);
             var videoSize = new Size(frameCaptureManager.Width, frameCaptureManager.Height);
-            var renderer = RendererFactory(_renderingOptions, videoSize);
+
+            ThumbnailRenderer renderer;
+            try
+            {
+                renderer = RendererFactory(_renderingOptions, videoSize);
+            }
+            catch
+            {
+                frameCaptureManager.Dispose();
+                throw;
+            }
+
             var logger = LoggerFactory?.CreateLogger(typeof(ThumbnailGenerator));
 
             return new ThumbnailGenerator(frameCaptureManager, renderer, logger);

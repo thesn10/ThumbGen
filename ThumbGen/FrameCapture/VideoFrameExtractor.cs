@@ -4,7 +4,7 @@ using FFmpegSharp;
 
 namespace ThumbGen.FrameCapture
 {
-    public class VideoFrameExtractor
+    public class VideoFrameExtractor : IDisposable
     {
         private readonly MediaDemuxer _reader;
 
@@ -57,6 +57,7 @@ namespace ThumbGen.FrameCapture
 
                     if (decoder.CodecType != AVMediaType.AVMEDIA_TYPE_VIDEO)
                     {
+                        decoder.Dispose();
                         continue;
                     }
 
@@ -71,9 +72,16 @@ namespace ThumbGen.FrameCapture
             }
             catch
             {
+                _decoder?.Dispose();
                 _reader.Dispose();
                 throw;
             }
+        }
+
+        public void Dispose()
+        {
+            _decoder.Dispose();
+            _reader.Dispose();
         }
 
         public (MediaFrame, TimeSpan) GetAtTimestamp(TimeSpan ts)
@@ -103,6 +111,8 @@ namespace ThumbGen.FrameCapture
                         return (frame, frameTs);
                     }
                 }
+
+                frame.Dispose();
             }
             
             throw new VideoDecodeException("Reached end of file without finding a valid frame");

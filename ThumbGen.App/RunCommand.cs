@@ -55,7 +55,7 @@ namespace ThumbGen.App
 
             try
             {
-                var thumbnailGenerator = builder.Build(options.InputFile.FullName);
+                using var thumbnailGenerator = builder.Build(options.InputFile.FullName);
                 await thumbnailGenerator.ExecuteAsync(opts, ct);
             }
             catch (ThumbGenException ex)

@@ -12,9 +12,8 @@ using ThumbGen.Renderer;
 
 namespace ThumbGen;
 
-public class ThumbnailGenerator
+public class ThumbnailGenerator : IDisposable
 {
-
     private readonly VideoFrameCaptureManager _frameCapture;
     private readonly ThumbnailRenderer _renderer;
     private readonly ILogger? _logger;
@@ -29,6 +28,8 @@ public class ThumbnailGenerator
         _renderer = renderer;
         _logger = logger;
     }
+
+    public void Dispose() => _frameCapture.Dispose();
 
     public ValueTask<List<ThumbnailRenderResult>> ExecuteAsync(ThumbGenOptions thumbGenOptions, CancellationToken ct = default)
     {

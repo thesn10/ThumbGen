@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ThumbGen.FrameCapture;
 
-public class VideoFrameCaptureManager
+public class VideoFrameCaptureManager : IDisposable
 {
     private readonly VideoFrameExtractor _frameExtractor;
     private readonly ILogger? _logger;
@@ -25,6 +25,8 @@ public class VideoFrameCaptureManager
         _frameExtractor = frameExtractor;
         _logger = logger;
     }
+
+    public void Dispose() => _frameExtractor.Dispose();
 
     public IReadOnlyList<Frame> PerformFrameCapture(
         int totalFrames,
@@ -60,35 +62,44 @@ public class VideoFrameCaptureManager
 
         var frames = new Frame[maxFrames.Value];
 
-        for (var frameNr = 0; frameNr < maxFrames; frameNr++)
+        try
         {
-            var frameTime = startTime.Value + interval * frameNr;
-
-            if (frameTime > endTime)
-                break;
-
-            using var frameActivity = Diagnostics.ActivitySource?.StartActivity("CaptureFrame");
-
-            frameActivity?.SetTag(Diagnostics.Constants.FrameCaptureFrameNr, frameNr);
-            frameActivity?.SetTag(Diagnostics.Constants.FrameCaptureFrameTime, frameTime);
-
-            var sw = Stopwatch.StartNew();
-
-            var (videoFrame, frameTs) = _frameExtractor.GetAtTimestamp(frameTime);
-
-            sw.Stop();
-
-            frameActivity?.SetTag(Diagnostics.Constants.FrameCaptureFrameTimestamp, frameTs);
-            frameActivity?.SetTag(Diagnostics.Constants.FrameCaptureElapsedTime, sw.Elapsed);
-
-            _logger?.LogDebug("Captured video frame {frameNr} at {frameTs} in {elapsed}", frameNr, frameTs, sw.Elapsed);
-
-            if (videoFrame is null)
+            for (var frameNr = 0; frameNr < maxFrames; frameNr++)
             {
-                throw new Exception("Video frame was null");
-            }
+                var frameTime = startTime.Value + interval * frameNr;
 
-            frames[frameNr] = new Frame(videoFrame, frameTs);
+                if (frameTime > endTime)
+                    break;
+
+                using var frameActivity = Diagnostics.ActivitySource?.StartActivity("CaptureFrame");
+
+                frameActivity?.SetTag(Diagnostics.Constants.FrameCaptureFrameNr, frameNr);
+                frameActivity?.SetTag(Diagnostics.Constants.FrameCaptureFrameTime, frameTime);
+
+                var sw = Stopwatch.StartNew();
+
+                var (videoFrame, frameTs) = _frameExtractor.GetAtTimestamp(frameTime);
+
+                sw.Stop();
+
+                frameActivity?.SetTag(Diagnostics.Constants.FrameCaptureFrameTimestamp, frameTs);
+                frameActivity?.SetTag(Diagnostics.Constants.FrameCaptureElapsedTime, sw.Elapsed);
+
+                _logger?.LogDebug("Captured video frame {frameNr} at {frameTs} in {elapsed}", frameNr, frameTs, sw.Elapsed);
+
+                if (videoFrame is null)
+                {
+                    throw new Exception("Video frame was null");
+                }
+
+                frames[frameNr] = new Frame(videoFrame, frameTs);
+            }
+        }
+        catch
+        {
+            foreach (var frame in frames)
+                frame?.Dispose();
+            throw;
         }
 
         return frames;

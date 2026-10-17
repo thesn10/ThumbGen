@@ -8,7 +8,7 @@ public class VideoFrameExtractorTests
     [Fact]
     public void Constructor_ReadsVideoProperties()
     {
-        var extractor = new VideoFrameExtractor(VideoConstants.Video_360p_MP4());
+        using var extractor = new VideoFrameExtractor(VideoConstants.Video_360p_MP4());
 
         Assert.Equal(360, extractor.Height);
         Assert.True(extractor.Width > 0);
@@ -18,7 +18,7 @@ public class VideoFrameExtractorTests
     [Fact]
     public void GetAtTimestamp_ReturnsFrameAtOrAfterRequestedTime()
     {
-        var extractor = new VideoFrameExtractor(VideoConstants.Video_360p_MP4());
+        using var extractor = new VideoFrameExtractor(VideoConstants.Video_360p_MP4());
         var requested = TimeSpan.FromSeconds(60);
 
         var (frame, timestamp) = extractor.GetAtTimestamp(requested);
@@ -31,7 +31,7 @@ public class VideoFrameExtractorTests
     [Fact]
     public void GetAtTimestamp_InFastMode_ReturnsFirstDecodedFrame()
     {
-        var extractor = new VideoFrameExtractor(VideoConstants.Video_360p_MP4()) { FastMode = true };
+        using var extractor = new VideoFrameExtractor(VideoConstants.Video_360p_MP4()) { FastMode = true };
 
         var (_, timestamp) = extractor.GetAtTimestamp(TimeSpan.FromSeconds(60));
 
@@ -41,7 +41,7 @@ public class VideoFrameExtractorTests
     [Fact]
     public void GetAtTimestamp_BeyondEndOfVideo_ThrowsVideoDecodeException()
     {
-        var extractor = new VideoFrameExtractor(VideoConstants.Video_360p_MP4());
+        using var extractor = new VideoFrameExtractor(VideoConstants.Video_360p_MP4());
 
         Assert.Throws<VideoDecodeException>(() => extractor.GetAtTimestamp(extractor.Duration + TimeSpan.FromHours(1)));
     }
@@ -76,14 +76,56 @@ public class VideoFrameExtractorTests
     }
 
     [Fact]
+    public void Constructor_WithUnknownDuration_ThrowsUnknownDurationException()
+    {
+        using var dir = new TempDirectory();
+        File.WriteAllBytes(dir.File("unknown.wav"), WavHeaderWithoutData(sampleRate: 8000));
+
+        var ex = Assert.Throws<UnknownDurationException>(() => new VideoFrameExtractor(dir.File("unknown.wav")));
+
+        Assert.Equal(dir.File("unknown.wav"), ex.Filename);
+    }
+
+    [Fact]
+    public void Dispose_ReleasesVideoFile()
+    {
+        using var dir = new TempDirectory();
+        File.Copy(VideoConstants.Video_360p_MP4(), dir.File("video.mp4"));
+        var extractor = new VideoFrameExtractor(dir.File("video.mp4"));
+
+        extractor.Dispose();
+
+        File.Delete(dir.File("video.mp4"));
+    }
+
+    [Fact]
     public void FrameTimestampString_IsFormattedAsClockTime()
     {
-        var extractor = new VideoFrameExtractor(VideoConstants.Video_360p_MP4());
+        using var extractor = new VideoFrameExtractor(VideoConstants.Video_360p_MP4());
         var (videoFrame, _) = extractor.GetAtTimestamp(TimeSpan.FromSeconds(1));
 
         var frame = new Frame(videoFrame, new TimeSpan(1, 2, 3));
 
         Assert.Equal("01:02:03", frame.GetTimestampString());
+    }
+
+    private static byte[] WavHeaderWithoutData(int sampleRate)
+    {
+        using var stream = new MemoryStream();
+        using var writer = new BinaryWriter(stream, Encoding.ASCII);
+        writer.Write("RIFF"u8);
+        writer.Write(36);
+        writer.Write("WAVEfmt "u8);
+        writer.Write(16);
+        writer.Write((short)1);
+        writer.Write((short)1);
+        writer.Write(sampleRate);
+        writer.Write(sampleRate);
+        writer.Write((short)1);
+        writer.Write((short)8);
+        writer.Write("data"u8);
+        writer.Write(0);
+        return stream.ToArray();
     }
 
     private static byte[] SilentWav(int sampleRate, int seconds)
