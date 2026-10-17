@@ -40,7 +40,16 @@ namespace ThumbGen.FrameCapture
                     continue;
                 }
 
-                var decoder = MediaDecoder.CreateDecoder(stream.CodecparRef);
+                MediaDecoder decoder;
+                try
+                {
+                    decoder = MediaDecoder.CreateDecoder(stream.CodecparRef);
+                }
+                catch (FFmpegException ex)
+                {
+                    throw new VideoDecodeException(ex);
+                }
+
                 if (decoder.CodecType != AVMediaType.AVMEDIA_TYPE_VIDEO)
                 {
                     continue;
@@ -72,7 +81,7 @@ namespace ThumbGen.FrameCapture
                 int ret = _decoder.SendPacket(packet);
                 if (ret < 0)
                 {
-                    throw new FFmpegException(ret);
+                    throw new VideoDecodeException(new FFmpegException(ret));
                 }
 
                 var frame = new MediaFrame();

@@ -53,18 +53,16 @@ namespace ThumbGen.App
 
             builder.ConfigureRendering(renderingOpts);
 
-            ThumbnailGenerator thumbnailGenerator;
             try
             {
-                thumbnailGenerator = builder.Build(options.InputFile.FullName);
+                var thumbnailGenerator = builder.Build(options.InputFile.FullName);
+                await thumbnailGenerator.ExecuteAsync(opts, ct);
             }
-            catch (VideoOpenException ex)
+            catch (ThumbGenException ex)
             {
                 await Console.Error.WriteLineAsync($"Error: {ex.Message}");
                 return 1;
             }
-
-            await thumbnailGenerator.ExecuteAsync(opts, ct);
 
             return 0;
         }
