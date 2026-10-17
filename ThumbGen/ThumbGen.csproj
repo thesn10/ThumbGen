@@ -33,6 +33,7 @@
 
   <ItemGroup>
 	<InternalsVisibleTo Include="ThumbGen.Magick" />
+	<InternalsVisibleTo Include="ThumbGen.Tests" />
   </ItemGroup>
 	
   <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
