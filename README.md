@@ -39,6 +39,52 @@ To Use magick renderer, just replace `UseSystemDrawingRenderer` with `UseMagickR
 
 Feel free to customize the options and rendering settings based on your specific requirements.
 
+### Output to a stream
+
+Use `WithOutputStream` instead of `WithOutputFilename` to write the thumbnail into a stream (no file is created). The stream is left open with its position at the end, so reset it before reading:
+
+```csharp
+var stream = new MemoryStream();
+var opts = new ThumbGenOptions()
+    .WithStartTime(TimeSpan.FromSeconds(10))
+    .WithOutputStream(stream, ThumbnailImageFormat.Jpeg);
+
+await thumbnailGenerator.ExecuteAsync(opts);
+stream.Position = 0;
+```
+
+Pass a `Func<int, Stream>` to `WithOutputStream` for multiple thumbnails, or call `WithoutFileOutput()` to only use the returned results.
+
+## Accessing the native image
+
+`ThumbnailRenderResult.Image` is an `IThumbnailImage`, which only offers `SaveToFile` and `SaveToStream`. For more control over the export, use pattern matching to get the renderer-specific object:
+
+- Magick renderer: `MagickThumbnailResult.Image` is an `IMagickImage<byte>`
+- System.Drawing renderer: `SystemDrawingThumbnailResult.Bitmap` is a `System.Drawing.Bitmap` (Windows only)
+
+```csharp
+using System.Drawing.Imaging;
+using ImageMagick;
+using ThumbGen.Magick;
+using ThumbGen.SystemDrawing;
+
+var results = await thumbnailGenerator.ExecuteAsync(opts.WithoutFileOutput());
+
+switch (results[0].Image)
+{
+    case MagickThumbnailResult { Image: var magickImage }:
+        magickImage.Quality = 60;
+        await magickImage.WriteAsync("thumbnail.webp", MagickFormat.WebP);
+        break;
+
+    case SystemDrawingThumbnailResult { Bitmap: var bitmap }:
+        bitmap.Save("thumbnail.png", ImageFormat.Png);
+        break;
+}
+```
+
+The images belong to the result, so clone them if they must outlive it.
+
 ## FFmpeg
 
 ThumbGen relies on the native FFmpeg shared libraries (**FFmpeg 8.1.x**, i.e. `libavformat.so.62` / `avformat-62.dll` or the platform equivalent). They are not bundled; you are responsible for installing or shipping them.

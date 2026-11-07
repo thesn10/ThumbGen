@@ -61,10 +61,16 @@ public class ThumbnailGenerator : IDisposable
             if (ct.IsCancellationRequested) 
                 yield break;
 
-            var imageFilePath = thumbGenOptions.GetFilePath?.Invoke(thumbnailFileIndex) ?? null;
+            var imageFilePath = thumbGenOptions.GetFilePath?.Invoke(thumbnailFileIndex);
             if (imageFilePath is not null)
             {
                 await renderResult.Image.SaveToFileAsync(imageFilePath).ConfigureAwait(false);
+            }
+
+            var outputStream = thumbGenOptions.GetOutputStream?.Invoke(thumbnailFileIndex);
+            if (outputStream is not null)
+            {
+                await renderResult.Image.SaveToStreamAsync(outputStream, thumbGenOptions.OutputStreamFormat).ConfigureAwait(false);
             }
 
             var imageUrl = thumbGenOptions.GetWebVTTImageUrl(imageFilePath, thumbnailFileIndex);

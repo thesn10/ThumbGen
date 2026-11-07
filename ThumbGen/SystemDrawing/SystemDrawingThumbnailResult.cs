@@ -1,31 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
-namespace ThumbGen.SystemDrawing
-{
+namespace ThumbGen.SystemDrawing;
+
+/// <summary>
+/// Thumbnail produced by the System.Drawing renderer. Cast <see cref="ThumbnailRenderResult.Image"/> to this type
+/// to access the underlying <see cref="System.Drawing.Bitmap"/> for custom export.
+/// </summary>
 #if NET5_0_OR_GREATER
-    [SupportedOSPlatform("windows")]
+[SupportedOSPlatform("windows")]
 #endif
-    internal class SystemDrawingThumbnailResult : IThumbnailImage
-    {
-        public Bitmap Bitmap { get; init; }
+public class SystemDrawingThumbnailResult(Bitmap bitmap) : IThumbnailImage
+{
+    /// <summary>
+    /// The rendered bitmap. It is owned by this result; clone it if it must outlive the result.
+    /// </summary>
+    public Bitmap Bitmap { get; } = bitmap;
 
-        public SystemDrawingThumbnailResult(Bitmap bitmap)
-        {
-            Bitmap = bitmap;
-        }
+    public void SaveToStream(Stream stream, ThumbnailImageFormat format = ThumbnailImageFormat.Jpeg) =>
+        Bitmap.Save(stream, format == ThumbnailImageFormat.Png ? ImageFormat.Png : ImageFormat.Jpeg);
 
-        public void SaveToFile(string filePath)
-        {
-            Bitmap.Save(filePath);
-        }
+    public Task SaveToStreamAsync(Stream stream, ThumbnailImageFormat format = ThumbnailImageFormat.Jpeg) =>
+        Task.Run(() => SaveToStream(stream, format));
 
-        public Task SaveToFileAsync(string filePath)
-        {
-            return Task.Run(() => Bitmap.Save(filePath));
-        }
-    }
+    public void SaveToFile(string filePath) => Bitmap.Save(filePath);
+
+    public Task SaveToFileAsync(string filePath) => Task.Run(() => Bitmap.Save(filePath));
 }

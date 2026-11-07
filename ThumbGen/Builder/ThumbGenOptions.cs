@@ -12,7 +12,9 @@ namespace ThumbGen.Builder
 
     public class ThumbGenOptions
     {
-        public Func<int, string> GetFilePath { get; set; } = (index) => FilePathWithIndex(index, "thumbnail.jpg");
+        public Func<int, string>? GetFilePath { get; set; } = (index) => FilePathWithIndex(index, "thumbnail.jpg");
+        public Func<int, Stream>? GetOutputStream { get; set; }
+        public ThumbnailImageFormat OutputStreamFormat { get; set; } = ThumbnailImageFormat.Jpeg;
         public Func<string?, int, string> GetWebVTTImageUrl { get; set; } = (imagePath, index) => Path.GetFileName(imagePath) ?? string.Empty;
         public string WebVTTFilename { get; set; } = "storyboard.vtt";
         public bool GenerateWebVTT { get; set; } = false;
@@ -27,6 +29,31 @@ namespace ThumbGen.Builder
         public ThumbGenOptions WithOutputFilename(string filepath)
         {
             GetFilePath = (index) => FilePathWithIndex(index, filepath);
+            return this;
+        }
+
+        public ThumbGenOptions WithoutFileOutput()
+        {
+            GetFilePath = null;
+            return this;
+        }
+
+        /// <summary>
+        /// Writes the thumbnail to the given stream instead of a file. The stream is not closed and its position is left at the end.
+        /// </summary>
+        public ThumbGenOptions WithOutputStream(Stream stream, ThumbnailImageFormat format = ThumbnailImageFormat.Jpeg)
+        {
+            return WithOutputStream(_ => stream, format);
+        }
+
+        /// <summary>
+        /// Writes each thumbnail to the stream returned for its index instead of a file. Streams are not closed.
+        /// </summary>
+        public ThumbGenOptions WithOutputStream(Func<int, Stream> getStream, ThumbnailImageFormat format = ThumbnailImageFormat.Jpeg)
+        {
+            GetOutputStream = getStream;
+            OutputStreamFormat = format;
+            GetFilePath = null;
             return this;
         }
 
