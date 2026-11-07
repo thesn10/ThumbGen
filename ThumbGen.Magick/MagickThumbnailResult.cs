@@ -15,6 +15,10 @@ public class MagickThumbnailResult(IMagickImage<byte> image) : IThumbnailImage
     /// </summary>
     public IMagickImage<byte> Image { get; } = image;
 
+    public int Width => (int)Image.Width;
+
+    public int Height => (int)Image.Height;
+
     public void SaveToStream(Stream stream, ThumbnailImageFormat format = ThumbnailImageFormat.Jpeg) =>
         Image.Write(stream, ToMagickFormat(format));
 

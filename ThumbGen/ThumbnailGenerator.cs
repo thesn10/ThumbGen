@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -17,16 +18,22 @@ public class ThumbnailGenerator : IDisposable
     private readonly VideoFrameCaptureManager _frameCapture;
     private readonly ThumbnailRenderer _renderer;
     private readonly ILogger? _logger;
-    public int Width { get; private set; }
-    public int Height { get; private set; }
+    
+    /// <summary>
+    /// Size of a full thumbnail, see <see cref="ThumbnailRenderer.ThumbnailSize"/>.
+    /// </summary>
+    public Size ThumbnailSize => _renderer.ThumbnailSize;
+
+    /// <summary>
+    /// Resolution of the source video.
+    /// </summary>
+    public Size VideoSize => new(_frameCapture.Width, _frameCapture.Height);
 
     internal ThumbnailGenerator(
         VideoFrameCaptureManager frameCapture,
         ThumbnailRenderer renderer,
-        int width, int height,
         ILogger? logger = null)
     {
-        Width=width; Height=height;
         _frameCapture = frameCapture;
         _renderer = renderer;
         _logger = logger;

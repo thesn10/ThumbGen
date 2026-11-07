@@ -18,6 +18,9 @@ namespace ThumbGen
 
     public interface IThumbnailImage
     {
+        int Width { get; }
+        int Height { get; }
+
         void SaveToStream(Stream stream, ThumbnailImageFormat format = ThumbnailImageFormat.Jpeg);
         Task SaveToStreamAsync(Stream stream, ThumbnailImageFormat format = ThumbnailImageFormat.Jpeg);
         /// <param name="format">Explicit file format, or null to derive it from the file extension.</param>

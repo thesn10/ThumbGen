@@ -36,6 +36,12 @@ namespace ThumbGen.Renderer
             (_totalSize, _frameSize, _borderSize) = sizing;
         }
 
+        /// <summary>
+        /// Size of a full thumbnail. A thumbnail rendered from fewer frames than <see cref="FramesPerThumbnail"/> is smaller;
+        /// use <see cref="IThumbnailImage.Width"/> and <see cref="IThumbnailImage.Height"/> of a result for its actual size.
+        /// </summary>
+        public Size ThumbnailSize => _totalSize;
+
         public int FramesPerThumbnail => _renderingOptions.TilingOptions.Rows * _renderingOptions.TilingOptions.Columns;
 
         public ThumbnailRenderResult Render(IReadOnlyList<Frame> frames, CancellationToken ct = default)

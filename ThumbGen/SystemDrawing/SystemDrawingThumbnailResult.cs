@@ -20,6 +20,10 @@ public class SystemDrawingThumbnailResult(Bitmap bitmap) : IThumbnailImage
     /// </summary>
     public Bitmap Bitmap { get; } = bitmap;
 
+    public int Width => Bitmap.Width;
+
+    public int Height => Bitmap.Height;
+
     public void SaveToStream(Stream stream, ThumbnailImageFormat format = ThumbnailImageFormat.Jpeg) =>
         Bitmap.Save(stream, ToImageFormat(format));
 
