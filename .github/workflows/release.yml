@@ -9,6 +9,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write  # enable GitHub OIDC token issuance for this job
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -43,10 +44,15 @@ jobs:
       run: dotnet nuget push ThumbGen.${{ github.event.release.tag_name }}.nupkg --source https://nuget.pkg.github.com/thesn10/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
     - name: Push ThumbGen.Magick to Github
       run: dotnet nuget push ThumbGen.Magick.${{ github.event.release.tag_name }}.nupkg --source https://nuget.pkg.github.com/thesn10/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+    - name: NuGet login (OIDC → temp API key)
+      uses: NuGet/login@v1
+      id: login
+      with:
+        user: TheSN
     - name: Push ThumbGen to Nuget
-      run: dotnet nuget push ThumbGen.${{ github.event.release.tag_name }}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+      run: dotnet nuget push ThumbGen.${{ github.event.release.tag_name }}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{steps.login.outputs.NUGET_API_KEY}} --skip-duplicate
     - name: Push ThumbGen.Magick to Nuget
-      run: dotnet nuget push ThumbGen.Magick.${{ github.event.release.tag_name }}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+      run: dotnet nuget push ThumbGen.Magick.${{ github.event.release.tag_name }}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{steps.login.outputs.NUGET_API_KEY}} --skip-duplicate
 
   cli:
     needs: build
