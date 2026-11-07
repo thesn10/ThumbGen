@@ -103,7 +103,7 @@ namespace ThumbGen
 
             var logger = LoggerFactory?.CreateLogger(typeof(ThumbnailGenerator));
 
-            return new ThumbnailGenerator(frameCaptureManager, renderer, logger);
+            return new ThumbnailGenerator(frameCaptureManager, renderer,videoSize.Width,videoSize.Height, logger);
         }
     }
 }
