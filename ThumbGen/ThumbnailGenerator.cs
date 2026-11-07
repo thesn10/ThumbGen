@@ -17,13 +17,16 @@ public class ThumbnailGenerator : IDisposable
     private readonly VideoFrameCaptureManager _frameCapture;
     private readonly ThumbnailRenderer _renderer;
     private readonly ILogger? _logger;
+    public int Width { get; private set; }
+    public int Height { get; private set; }
 
     internal ThumbnailGenerator(
         VideoFrameCaptureManager frameCapture,
         ThumbnailRenderer renderer,
+        int width, int height,
         ILogger? logger = null)
     {
-
+        Width=width; Height=height;
         _frameCapture = frameCapture;
         _renderer = renderer;
         _logger = logger;
