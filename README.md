@@ -41,7 +41,7 @@ Feel free to customize the options and rendering settings based on your specific
 
 ### Output to a stream
 
-Use `WithOutputStream` instead of `WithOutputFilename` to write the thumbnail into a stream (no file is created). The stream is left open with its position at the end, so reset it before reading:
+By default nothing is written to disk; use `WithOutputFilename` and/or `WithOutputStream` to choose the output. `WithOutputStream` writes the thumbnail into a stream. The stream is left open with its position at the end, so reset it before reading:
 
 ```csharp
 var stream = new MemoryStream();
@@ -53,7 +53,7 @@ await thumbnailGenerator.ExecuteAsync(opts);
 stream.Position = 0;
 ```
 
-Pass a `Func<int, Stream>` to `WithOutputStream` for multiple thumbnails, or call `WithoutFileOutput()` to only use the returned results.
+Pass a `Func<int, Stream>` to `WithOutputStream` for multiple thumbnails. `WithOutputFilename` derives the file format from the extension (`.jpg`, `.png`); pass a `ThumbnailImageFormat` as second argument to override it.
 
 ## Accessing the native image
 
@@ -68,7 +68,7 @@ using ImageMagick;
 using ThumbGen.Magick;
 using ThumbGen.SystemDrawing;
 
-var results = await thumbnailGenerator.ExecuteAsync(opts.WithoutFileOutput());
+var results = await thumbnailGenerator.ExecuteAsync(opts);
 
 switch (results[0].Image)
 {

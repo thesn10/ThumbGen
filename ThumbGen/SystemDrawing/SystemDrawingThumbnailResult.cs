@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.Versioning;
@@ -21,12 +21,31 @@ public class SystemDrawingThumbnailResult(Bitmap bitmap) : IThumbnailImage
     public Bitmap Bitmap { get; } = bitmap;
 
     public void SaveToStream(Stream stream, ThumbnailImageFormat format = ThumbnailImageFormat.Jpeg) =>
-        Bitmap.Save(stream, format == ThumbnailImageFormat.Png ? ImageFormat.Png : ImageFormat.Jpeg);
+        Bitmap.Save(stream, ToImageFormat(format));
 
     public Task SaveToStreamAsync(Stream stream, ThumbnailImageFormat format = ThumbnailImageFormat.Jpeg) =>
         Task.Run(() => SaveToStream(stream, format));
 
-    public void SaveToFile(string filePath) => Bitmap.Save(filePath);
+    public void SaveToFile(string filePath, ThumbnailImageFormat? format = null)
+    {
+        var resolvedFormat = format ?? FormatFromExtension(filePath);
+        if (resolvedFormat is { } knownFormat)
+            Bitmap.Save(filePath, ToImageFormat(knownFormat));
+        else
+            Bitmap.Save(filePath);
+    }
 
-    public Task SaveToFileAsync(string filePath) => Task.Run(() => Bitmap.Save(filePath));
+    public Task SaveToFileAsync(string filePath, ThumbnailImageFormat? format = null) =>
+        Task.Run(() => SaveToFile(filePath, format));
+
+    private static ImageFormat ToImageFormat(ThumbnailImageFormat format) =>
+        format == ThumbnailImageFormat.Png ? ImageFormat.Png : ImageFormat.Jpeg;
+
+    private static ThumbnailImageFormat? FormatFromExtension(string filePath) =>
+        Path.GetExtension(filePath).ToLowerInvariant() switch
+        {
+            ".jpg" or ".jpeg" => ThumbnailImageFormat.Jpeg,
+            ".png" => ThumbnailImageFormat.Png,
+            _ => null
+        };
 }

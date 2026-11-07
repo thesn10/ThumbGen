@@ -1,4 +1,4 @@
-using ImageMagick;
+﻿using ImageMagick;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -21,9 +21,18 @@ public class MagickThumbnailResult(IMagickImage<byte> image) : IThumbnailImage
     public Task SaveToStreamAsync(Stream stream, ThumbnailImageFormat format = ThumbnailImageFormat.Jpeg) =>
         Image.WriteAsync(stream, ToMagickFormat(format));
 
-    public void SaveToFile(string filePath) => Image.Write(filePath);
+    public void SaveToFile(string filePath, ThumbnailImageFormat? format = null)
+    {
+        if (format is { } explicitFormat)
+            Image.Write(filePath, ToMagickFormat(explicitFormat));
+        else
+            Image.Write(filePath);
+    }
 
-    public Task SaveToFileAsync(string filePath) => Image.WriteAsync(filePath);
+    public Task SaveToFileAsync(string filePath, ThumbnailImageFormat? format = null) =>
+        format is { } explicitFormat
+            ? Image.WriteAsync(filePath, ToMagickFormat(explicitFormat))
+            : Image.WriteAsync(filePath);
 
     private static MagickFormat ToMagickFormat(ThumbnailImageFormat format) => format switch
     {

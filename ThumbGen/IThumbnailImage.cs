@@ -20,7 +20,9 @@ namespace ThumbGen
     {
         void SaveToStream(Stream stream, ThumbnailImageFormat format = ThumbnailImageFormat.Jpeg);
         Task SaveToStreamAsync(Stream stream, ThumbnailImageFormat format = ThumbnailImageFormat.Jpeg);
-        void SaveToFile(string filePath);
-        Task SaveToFileAsync(string filePath);
+        /// <param name="format">Explicit file format, or null to derive it from the file extension.</param>
+        void SaveToFile(string filePath, ThumbnailImageFormat? format = null);
+        /// <param name="format">Explicit file format, or null to derive it from the file extension.</param>
+        Task SaveToFileAsync(string filePath, ThumbnailImageFormat? format = null);
     }
 }

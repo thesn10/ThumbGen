@@ -64,7 +64,7 @@ public class ThumbnailGenerator : IDisposable
             var imageFilePath = thumbGenOptions.GetFilePath?.Invoke(thumbnailFileIndex);
             if (imageFilePath is not null)
             {
-                await renderResult.Image.SaveToFileAsync(imageFilePath).ConfigureAwait(false);
+                await renderResult.Image.SaveToFileAsync(imageFilePath, thumbGenOptions.OutputFileFormat).ConfigureAwait(false);
             }
 
             var outputStream = thumbGenOptions.GetOutputStream?.Invoke(thumbnailFileIndex);

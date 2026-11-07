@@ -12,7 +12,8 @@ namespace ThumbGen.Builder
 
     public class ThumbGenOptions
     {
-        public Func<int, string>? GetFilePath { get; set; } = (index) => FilePathWithIndex(index, "thumbnail.jpg");
+        public Func<int, string>? GetFilePath { get; set; }
+        public ThumbnailImageFormat? OutputFileFormat { get; set; }
         public Func<int, Stream>? GetOutputStream { get; set; }
         public ThumbnailImageFormat OutputStreamFormat { get; set; } = ThumbnailImageFormat.Jpeg;
         public Func<string?, int, string> GetWebVTTImageUrl { get; set; } = (imagePath, index) => Path.GetFileName(imagePath) ?? string.Empty;
@@ -26,20 +27,17 @@ namespace ThumbGen.Builder
         public double? EndTimePercent { get; set; }
         public double? StartTimePercent { get; set; }
 
-        public ThumbGenOptions WithOutputFilename(string filepath)
+        /// <param name="filepath">Target file. Further thumbnails get their index appended to the file name.</param>
+        /// <param name="format">Explicit file format, or null to derive it from the file extension.</param>
+        public ThumbGenOptions WithOutputFilename(string filepath, ThumbnailImageFormat? format = null)
         {
             GetFilePath = (index) => FilePathWithIndex(index, filepath);
-            return this;
-        }
-
-        public ThumbGenOptions WithoutFileOutput()
-        {
-            GetFilePath = null;
+            OutputFileFormat = format;
             return this;
         }
 
         /// <summary>
-        /// Writes the thumbnail to the given stream instead of a file. The stream is not closed and its position is left at the end.
+        /// Writes the thumbnail to the given stream. The stream is not closed and its position is left at the end.
         /// </summary>
         public ThumbGenOptions WithOutputStream(Stream stream, ThumbnailImageFormat format = ThumbnailImageFormat.Jpeg)
         {
@@ -47,13 +45,12 @@ namespace ThumbGen.Builder
         }
 
         /// <summary>
-        /// Writes each thumbnail to the stream returned for its index instead of a file. Streams are not closed.
+        /// Writes each thumbnail to the stream returned for its index. Streams are not closed.
         /// </summary>
         public ThumbGenOptions WithOutputStream(Func<int, Stream> getStream, ThumbnailImageFormat format = ThumbnailImageFormat.Jpeg)
         {
             GetOutputStream = getStream;
             OutputStreamFormat = format;
-            GetFilePath = null;
             return this;
         }
 
